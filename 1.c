@@ -47,6 +47,9 @@ typedef struct {
     int cost;
     int compartments;
     char seatType[100];
+    char name[100];
+    int maxSpeed;
+    int totalDist;
 } Train;
 
 typedef struct {
@@ -93,7 +96,7 @@ void mainMenu();
 void trainListandBook();
 void showCompartment( int compartment,  const char* trainId);
 void showTickets( int choosenCompartment,  const char* trainId);
-void sleepProgram( int seconds);
+void sleepProgram( float seconds);
 void payNow( const char* trainId,  int ticketsToBuy,  int choosenCompartment,  int* ticketsNums);
 void paymentGateway(const char* trainId, int ticketsToBuy, int choosenCompartment, float totalPrice, int ticketsNums[MAX_PASSENGERS]);
 void confirmTickets( const char* trainId,  int ticketsToBuy,  int choosenCompartment,  int* ticketsNums,  float totalPrice);
@@ -103,10 +106,40 @@ void getTrainInformation( const char* trainId,  int ticketsToBuy,  int choosenCo
 void checkAllReservations();
 void deleteReservationByPnr(long long pnr);
 void showUserInfo();
+void adminControls();
+void displayDelayedTrains(int isAdmin);
+void adminLogin();
 
-void sleepProgram(int seconds) 
+void sleepProgram(float seconds) 
 {
   Sleep(seconds * 1000);
+}
+
+void PrintSleep(float seconds){
+    sleepProgram(seconds);
+    printf("========");
+    sleepProgram(seconds);
+    printf("========");
+    sleepProgram(seconds);
+    printf("========");
+    sleepProgram(seconds);
+    printf("========");
+    sleepProgram(seconds);
+    printf("========");
+    sleepProgram(seconds);
+    printf("========");
+    sleepProgram(seconds);
+    printf("========");
+    sleepProgram(seconds);
+    printf("========");
+    sleepProgram(seconds);
+    printf("========");
+    sleepProgram(seconds);
+    printf("========");
+    sleepProgram(seconds);
+    printf("========");
+    sleepProgram(seconds);
+    printf("======\n");
 }
 
 void clearTerminal(){
@@ -149,7 +182,6 @@ void signup() {
     printf("Please enter your email: ");
     scanf("%s", newUser.email);
 
-    // Check if the user with the same email already exists
     if (userExists(newUser.email)) {
         printf("\nUser with the same email already exists. Press 1 to log in. Press 2 to try again\n");
           scanf("%d", &AlrExists);
@@ -164,10 +196,8 @@ void signup() {
     printf("Please enter your password: ");
     scanf("%s", newUser.password);
 
-    // Auto-generate userId (you can implement your logic for generating unique userId)
     sprintf(newUser.userId, "%08d", rand() % 100000000);
 
-    // Write user information to file
     fprintf(file, "%s %s %s %s\n", newUser.userId, newUser.email, newUser.password, newUser.name);
     printf("\nNew user created successfully!\n");
     printf("\nHere are user Details:\n");
@@ -308,7 +338,6 @@ void resetPass() {
         exit(1);
     }
 
-    // Create a temporary file
     FILE *tempFile = fopen("temp.txt", "w");
     if (tempFile == NULL) {
         printf("Error creating temporary file.\n");
@@ -328,11 +357,9 @@ void resetPass() {
             scanf("%s", newPassword);
             getchar();
 
-            // Modify the password in memory
             strcpy(user.password, newPassword);
         }
 
-        // Write the line to the temporary file
         fprintf(tempFile, "%s %s %s %s\n", user.userId, user.email, user.password, user.name);
     }
 
@@ -371,7 +398,7 @@ void resetPass() {
 }
 
 void LogOrSign(){
-    int LogOrSign;
+    int LogOrSignOpt;
     clearTerminal();
     printf("\n\n\n\n\n==============================================================================================\n\n");
     printf("Please Login or Signup to continue booking tickets");
@@ -379,11 +406,11 @@ void LogOrSign(){
     printf("  Select from the following options:\n\n");
     printf("   \033[1;31m[1]\033[0m Login \n\n");
     printf("   \033[1;31m[2]\033[0m Signup\n\n");
-    printf("   \033[1;31m[3]\033[0m Reset Password\n\n");
-    scanf("%d", &LogOrSign);
-    do
-    {
-        switch (LogOrSign)
+    printf("   \033[1;31m[3]\033[0m Reset Password\n\n\n\n");
+    printf("   \033[1;31m[4]\033[0m ADMIN LOGIN\n\n");
+    scanf("%d", &LogOrSignOpt);
+
+    switch (LogOrSignOpt)
     {
     case 1:
         login();
@@ -395,11 +422,52 @@ void LogOrSign(){
     case 3:
         resetPass();
         break;
+    case 4:
+        adminLogin();
+        break;
     default:
         printf("Please Choose Correct Option");
+        sleepProgram(1);
+        LogOrSign();
         break;
     }
-    } while (LogOrSign != 1 && LogOrSign != 2 && LogOrSign != 3);
+}
+
+void adminLogin(){
+    int AdminLoginOpt;
+    clearTerminal();
+    redColor();
+    char adminPass[100];
+    strcpy(adminPass, "AyushG07");
+    printf("\n\n\n\n\n==============================================================================================\n\n");
+    printf("Please Login With ADMIN PASS to continue to ADMIN CONTROLS");
+    printf("\n\n==============================================================================================\n\n");
+    printf("Print Admin PASS (case-sensitive):");
+    scanf("%s", adminPass);
+    PrintSleep(0.18);
+    getchar();
+    if (strcmp(adminPass, "AyushG07") == 0) {
+        printf("\n\n\n\n\n==============================================================================================\n\n");
+        printf("Welcome to ADMIN CONTROLS");
+        printf("\n\n==============================================================================================\n\n");
+        printf("You will be redirected to ADMIN CONTROLS in 3 seconds!");
+        sleepProgram(3);
+        adminControls();
+    } else {
+        printf("\n\n\n\n\n==============================================================================================\n\n");
+        printf("Incorrect Password");
+        printf("\n\n==============================================================================================\n\n");
+        printf("Do you want to try again? press 1 to try again, press any other key to return to login");
+        scanf("%d", &AdminLoginOpt);
+        if (AdminLoginOpt == 1) {
+            sleepProgram(1);
+            adminLogin();
+        } else {
+            sleepProgram(1);
+            LogOrSign();
+        }
+    }
+
 }
 
 void addTrain() {
@@ -409,20 +477,15 @@ void addTrain() {
         exit(1);
     }
 
-    // Read the current number of trains
     int numTrains;
     fscanf(file, "%d", &numTrains);
 
-    // Increment the number of trains
     numTrains++;
 
-    // Move the file pointer to the beginning
     fseek(file, 0, SEEK_SET);
 
-    // Write the updated number of trains back to the file
     fprintf(file, "%d\n", numTrains);
 
-    // Move the file pointer to the end for appending the new train
     fseek(file, 0, SEEK_END);
 
     Train newTrain;
@@ -447,9 +510,22 @@ void addTrain() {
     printf("Please enter Seat type:- sleeper or seater: ");
     scanf("%s", newTrain.seatType);
 
-    fprintf(file, "%s %s %s %s %d %d %s\n", newTrain.trainId, newTrain.startingPoint, newTrain.destination, newTrain.departureTime, newTrain.cost, newTrain.compartments, newTrain.seatType);
+    printf("Please enter Name of Train: ");
+    scanf("%s", newTrain.name);
+
+    printf("Please enter max speed of train: ");
+    scanf("%d", &newTrain.maxSpeed);
+
+    printf("Please enter total distance to be travelled by train: ");
+    scanf("%d", &newTrain.totalDist);
+
+    fprintf(file, "%s %s %s %s %d %d %s %s %d %d\n", newTrain.trainId, newTrain.startingPoint, newTrain.destination, newTrain.departureTime, newTrain.cost, newTrain.compartments, newTrain.seatType, newTrain.name, newTrain.maxSpeed, newTrain.totalDist);
 
     fclose(file);
+
+    printf("\nYou Will Be Redirected To Main Menu In 5 Seconds\n");
+    sleepProgram(5);
+    mainMenu();
 
     printf("\nTrain added successfully!\n");
 }
@@ -464,18 +540,18 @@ void displayAllTrains() {
     int numTrains;
     fscanf(file, "%d", &numTrains);
 
-    printf("\n====================================================================================================================================\n");
-    printf("| %-10s | %-20s | %-20s | %-15s | %-5s | %-20s | %-20s |\n", "Train ID", "Starting Point", "Destination", "Departure Time", "Cost", "Compartments", "Seat Type");
-    printf("====================================================================================================================================\n");
+    printf("\n========================================================================================================================================================================================\n");
+    printf("| %-10s | %-20s | %-20s | %-15s | %-5s | %-20s | %-20s | %-20s | %-5s | %-5s | ", "Train ID", "Starting Point", "Destination", "Departure Time", "Cost", "Compartments", "Seat Type", "Train Name", "Max Speed", "Total Distance");
+    printf("\n========================================================================================================================================================================================\n");
 
     for (int i = 0; i < numTrains; i++) {
         Train train;
-        fscanf(file, "%s %s %s %s %d %d %s", train.trainId, train.startingPoint, train.destination,  train.departureTime, &train.cost, &train.compartments, train.seatType);
+        fscanf(file, "%s %s %s %s %d %d %s %s %d %d", train.trainId, train.startingPoint, train.destination,  train.departureTime, &train.cost, &train.compartments, train.seatType, train.name, &train.maxSpeed, &train.totalDist);
 
-        printf("| %-10s | %-20s | %-20s | %-15s | %-5d | %-20d | %-20s |\n", train.trainId, train.startingPoint, train.destination, train.departureTime, train.cost, train.compartments, train.seatType);
+        printf("| %-10s | %-20s | %-20s | %-15s | %-5d | %-20d | %-20s | %-20s | %-5dKM/H | %-12dKM |\n", train.trainId, train.startingPoint, train.destination, train.departureTime, train.cost, train.compartments, train.seatType, train.name, train.maxSpeed, train.totalDist);
     }
 
-    printf("====================================================================================================================================\n");
+    printf("========================================================================================================================================================================================\n");
     fclose(file);
 }
 
@@ -505,7 +581,7 @@ void sortByCost(int sortOrder) {
     }
 
     for (int i = 0; i < numTrains; i++) {
-        fscanf(file, "%s %s %s %s %d %d %s", trains[i].trainId, trains[i].startingPoint, trains[i].destination, trains[i].departureTime, &trains[i].cost, &trains[i].compartments, trains[i].seatType);
+        fscanf(file, "%s %s %s %s %d %d %s %s %d %d", trains[i].trainId, trains[i].startingPoint, trains[i].destination, trains[i].departureTime, &trains[i].cost, &trains[i].compartments, trains[i].seatType, trains[i].name, &trains[i].maxSpeed, &trains[i].totalDist);
     }
 
     fclose(file);
@@ -516,16 +592,28 @@ void sortByCost(int sortOrder) {
         qsort(trains, numTrains, sizeof(Train), compareByCostAsc);
     }
 
-    // Display sorted trains
-    printf("\n====================================================================================================================================\n");
-    printf("| %-10s | %-20s | %-20s | %-15s | %-5s | %-20s | %-20s |\n", "Train ID", "Starting Point", "Destination", "Departure Time", "Cost", "Compartments", "Seat Type");
-    printf("====================================================================================================================================\n");
+    printf("\n========================================================================================================================================================================================\n");
+    printf("| %-10s | %-20s | %-20s | %-15s | %-5s | %-20s | %-20s | %-20s | %-5s | %-5s | ", "Train ID", "Starting Point", "Destination", "Departure Time", "Cost", "Compartments", "Seat Type", "Train Name", "Max Speed", "Total Distance");
+    printf("\n========================================================================================================================================================================================\n");
 
     for (int i = 0; i < numTrains; i++) {
-        printf("| %-10s | %-20s | %-20s | %-15s | %-5d | %-20d | %-20s |\n", trains[i].trainId, trains[i].startingPoint, trains[i].destination, trains[i].departureTime, trains[i].cost, trains[i].compartments, trains[i].seatType);
+        printf("| %-10s | %-20s | %-20s | %-15s | %-5d | %-20d | %-20s | %-20s | %-5dKM/H | %-12dKM |\n", trains[i].trainId, trains[i].startingPoint, trains[i].destination, trains[i].departureTime, trains[i].cost, trains[i].compartments, trains[i].seatType, trains[i].name, trains[i].maxSpeed, trains[i].totalDist);
     }
-    printf("====================================================================================================================================\n");
+    printf("\n========================================================================================================================================================================================\n");
 
+    printf("\nPress 1 to continue to booking or press 2 to go back to main menu: ");
+    int afterSortChoice;
+    scanf("%d", &afterSortChoice);
+    if (afterSortChoice == 1) {
+        printf("Please enter the train id: ");
+        getchar();  
+        char trainId[10];
+        scanf("%s", trainId);
+        findTrain(trainId);
+    } else{
+        sleepProgram(1);
+        mainMenu();
+    }
     free(trains);
 }
 
@@ -536,13 +624,12 @@ void findTrainsByDestination(const char* destination) {
         exit(1);
     }
 
-    // Skip the first line
     int numTrains;
     fscanf(file, "%d", &numTrains);
 
-    printf("\n====================================================================================================================================\n");
-    printf("| %-10s | %-20s | %-20s | %-15s | %-5s | %-20s | %-20s |\n", "Train ID", "Starting Point", "Destination", "Departure Time", "Cost", "Compartments", "Seat Type");
-    printf("====================================================================================================================================\n");
+    printf("\n========================================================================================================================================================================================\n");
+    printf("| %-10s | %-20s | %-20s | %-15s | %-5s | %-20s | %-20s | %-20s | %-5s | %-5s | ", "Train ID", "Starting Point", "Destination", "Departure Time", "Cost", "Compartments", "Seat Type", "Train Name", "Max Speed", "Total Distance");
+    printf("\n========================================================================================================================================================================================\n");
 
     Train train;
     int found = 0;
@@ -550,15 +637,34 @@ void findTrainsByDestination(const char* destination) {
     while (fscanf(file, "%s %s %s %s %d %d %s", train.trainId, train.startingPoint, train.destination, train.departureTime, &train.cost, &train.compartments, train.seatType) != EOF) {
         if (strcmp(train.destination, destination) == 0) {
             found = 1;
-            printf("| %-10s | %-20s | %-20s | %-15s | %-5d | %-20d | %-20s |\n", train.trainId, train.startingPoint, train.destination, train.departureTime, train.cost, train.compartments, train.seatType);
+            printf("| %-10s | %-20s | %-20s | %-15s | %-5d | %-20d | %-20s | %-20s | %-5dKM/H | %-12dKM |\n", train.trainId, train.startingPoint, train.destination, train.departureTime, train.cost, train.compartments, train.seatType, train.name, train.maxSpeed, train.totalDist);
         }
     }
-    printf("====================================================================================================================================\n");
+    printf("\n========================================================================================================================================================================================\n");
 
     fclose(file);
 
-    if (!found) {
+    if(found){
+        printf("\nPress 1 to continue to booking or press 2 to go back to main menu: ");
+        int afterSortChoice;
+        scanf("%d", &afterSortChoice);
+        if (afterSortChoice == 1) {
+            printf("Please enter the train id: ");
+            getchar();  
+            char trainId[10];
+            scanf("%s", trainId);
+            findTrain(trainId);
+        } else{
+            sleepProgram(1);
+            mainMenu();
+        }
+    }
+
+    if (!found){ 
         printf("No trains found for the destination: %s\n", destination);
+        printf("You will be redirected to main menu in 3 seconds.\n");
+        sleepProgram(3);
+        mainMenu();
     }
 }
 
@@ -569,13 +675,12 @@ void findTrainsByStartingPoint(const char* startingPoint) {
         exit(1);
     }
 
-    // Skip the first line
     int numTrains;
     fscanf(file, "%d", &numTrains);
 
-    printf("\n====================================================================================================================================\n");
-    printf("| %-10s | %-20s | %-20s | %-15s | %-5s | %-20s | %-20s |\n", "Train ID", "Starting Point", "Destination", "Departure Time", "Cost", "Compartments", "Seat Type");
-    printf("====================================================================================================================================\n");
+    printf("\n========================================================================================================================================================================================\n");
+    printf("| %-10s | %-20s | %-20s | %-15s | %-5s | %-20s | %-20s | %-20s | %-5s | %-5s | ", "Train ID", "Starting Point", "Destination", "Departure Time", "Cost", "Compartments", "Seat Type", "Train Name", "Max Speed", "Total Distance");
+    printf("========================================================================================================================================================================================\n");
 
     Train train;
     int found = 0;
@@ -583,45 +688,76 @@ void findTrainsByStartingPoint(const char* startingPoint) {
     while (fscanf(file, "%s %s %s %s %d %d %s", train.trainId, train.startingPoint, train.destination, train.departureTime, &train.cost, &train.compartments, train.seatType) != EOF) {
         if (strcmp(train.startingPoint, startingPoint) == 0) {
             found = 1;
-            printf("| %-10s | %-20s | %-20s | %-15s | %-5d | %-20d | %-20s |\n", train.trainId, train.startingPoint, train.destination, train.departureTime, train.cost, train.compartments, train.seatType);
+            printf("| %-10s | %-20s | %-20s | %-15s | %-5d | %-20d | %-20s | %-20s | %-5dKM/H | %-12dKM |\n", train.trainId, train.startingPoint, train.destination, train.departureTime, train.cost, train.compartments, train.seatType, train.name, train.maxSpeed, train.totalDist);
         }
     }
-    printf("====================================================================================================================================\n");
+    printf("\n========================================================================================================================================================================================\n");
 
     fclose(file);
-
-    if (!found) {
-        printf("No trains found for the Starting Point: %s\n", startingPoint);
+    if(found){
+        printf("\nPress 1 to continue to booking or press 2 to go back to main menu: ");
+        int afterSortChoice;
+        scanf("%d", &afterSortChoice);
+        if (afterSortChoice == 1) {
+            printf("Please enter the train id: ");
+            getchar();  
+            char trainId[10];
+            scanf("%s", trainId);
+            findTrain(trainId);
+        } else{
+            sleepProgram(1);
+            mainMenu();
+        }
     }
+
+    if (!found){ 
+        printf("No trains found for the start point: %s\n", startingPoint);
+        printf("You will be redirected to main menu in 3 seconds.\n");
+        sleepProgram(3);
+        mainMenu();
+    }
+
 }
 
 void adminControls() {
     clearTerminal();
+    greenColor();
     printf("\n====================================================================================================================================\n");
-    printf("Welcome To Admin Controls");
+    printf("\n\t\t\tWelcome To Admin Controls\n");
+    printf("  *Please Select Appropriate Option:*\n");
     printf("\n====================================================================================================================================\n");
-    printf("Please Select Appropriate Option:\n");
     printf("   \033[1;31m[1]\033[0m VIEW TRAIN LIST \n\n");
     printf("   \033[1;31m[2]\033[0m ADD NEW TRAIN\n\n");
     printf("   \033[1;31m[3]\033[0m Add Delayed Trains\n\n");
-    printf("   \033[1;31m[4]\033[0m GO BACK TO MAIN MENU\n\n");
+    printf("   \033[1;31m[4]\033[0m Add Delayed Trains\n\n");
+    printf("   \033[1;31m[5]\033[0m GO BACK TO LOGIN SIGNUP WINDOW\n\n");
     int adminChoice;
     scanf("%d", &adminChoice);
     switch (adminChoice) {
     case 1:
+        sleepProgram(1);
         displayAllTrains();
+        adminControls();
         break;
     case 2:
+        sleepProgram(1);
         addTrain();
         break;
     case 3:
+        sleepProgram(1);
         addDelayedTrain();
         break;
     case 4:
-        mainMenu();
+        sleepProgram(1);
+        displayDelayedTrains(0);
+        break;
+    case 5:
+        sleepProgram(1);
+        LogOrSign();
         break;
     default:
         printf("Oops Wrong Choice");
+        adminControls();
         break;
     }
 
@@ -675,7 +811,7 @@ void addDelayedTrain() {
     adminControls();
 }
 
-void displayDelayedTrains() {
+void displayDelayedTrains(int isAdmin) {
     FILE *file = fopen("delayed.txt", "r");
     if (file == NULL) {
         printf("Error opening file.\n");
@@ -693,7 +829,12 @@ void displayDelayedTrains() {
     printf("===========================================================================================================================================================\n");
     fclose(file);
     sleepProgram(3);
-    mainMenu();
+    if(isAdmin == 1){
+        mainMenu();
+    }else{
+        adminControls();
+    }
+    
 }
 
 void trainListandBook(){
@@ -702,14 +843,17 @@ void trainListandBook(){
         printf("Do you want to sort trains? (1 for yes) Or Press 2 for ticket booking Or Press anu other key to go back to main menu: ");
         scanf("%d", &ifSort);
         if (ifSort == 1) {
-            printf("Do you want to sort by cost? (1 for ascending, 2 for descinding) Or Do you want to sort based on destination or starting point? (3 for destination, 4 for starting point) Or press any other key to go back to main menu: ");
+            yellowColor();
+            printf("\n\nDo you want to sort by cost? (1 for ascending, 2 for descinding) Or Do you want to sort based on destination or starting point? (3 for destination, 4 for starting point) Or press any other key to go back to main menu: ");
             int sortChoice;
             scanf("%d", &sortChoice);
             if (sortChoice == 1) {
+                resetColor();
                 sortByCost(1);
             }
             else if (sortChoice == 2)
             {
+                resetColor();
               sortByCost(2);
             }
             else if(sortChoice == 3)
@@ -717,6 +861,7 @@ void trainListandBook(){
                 char destination[100];
                 printf("Enter the destination: ");
                 scanf("%s", destination);
+                resetColor();
                 findTrainsByDestination(destination);
             }
             else if(sortChoice == 4)
@@ -724,16 +869,18 @@ void trainListandBook(){
                 char startingPoint[100];
                 printf("Enter the starting point: ");
                 scanf("%s", startingPoint);
+                resetColor();
                 findTrainsByStartingPoint(startingPoint);
             }
             else{
+                resetColor();
               mainMenu();
             }
         }
         else if (ifSort == 2)
         {
           printf("Please enter the train id: ");
-          getchar(); // Consume the trailing newline character
+          getchar();  
           char trainId[10];
           scanf("%s", trainId);
           findTrain(trainId);
@@ -752,14 +899,14 @@ void findTrain(const char* trainId) {
     }
 
   
-    // Read and discard the first line (number of trains)
+  
     int numTrains;
     fscanf(file, "%d", &numTrains);
 
     Train train;
     int trainFound = 0;
-
-    while (fscanf(file, "%s %s %s %s %d %d %s", train.trainId, train.startingPoint, train.destination, train.departureTime, &train.cost, &train.compartments, train.seatType) != EOF) {
+    PrintSleep(0.18);
+    while (fscanf(file, "%s %s %s %s %d %d %s %s %d %d", train.trainId, train.startingPoint, train.destination, train.departureTime, &train.cost, &train.compartments, train.seatType, train.name, &train.maxSpeed, &train.totalDist) != EOF) {
         if (strcmp(train.trainId, trainId) == 0) {
             trainFound = 1;
             printf("\n\n==============================================================================================\n");
@@ -768,10 +915,14 @@ void findTrain(const char* trainId) {
             printf("Starting Point: %s\n", train.startingPoint);
             printf("Destination: %s\n", train.destination);
             printf("Departure Time: %s\n", train.departureTime);
-            printf("Cost: %d\n", train.cost);
+            printf("Cost: %d (cost for general class ticket!!)\n", train.cost);
             printf("Compartments: %d\n", train.compartments);
             printf("Seat Type: %s\n", train.seatType);
+            printf("Train Name: %s\n", train.name);
+            printf("Max Speed: %d km/h\n", train.maxSpeed);
+            printf("Total Distance to be travelled: %d\n", train.totalDist);
             printf("==============================================================================================\n");
+            sleepProgram(1);
             showCompartment(train.compartments, train.trainId);
             break;
         }
@@ -809,23 +960,27 @@ void showCompartment( int compartment, const char* trainId){
         printf("----------------");
     }
     printf("+\n");
+    sleepProgram(1);
     printf("\n\n\nPlease Enter Your Preferred Compartment:");
+    yellowColor();
     printf("\n\t1)First compartment is First AC\n\t2)Second compartment is Exectuive Class\n\t3)Third compartment is Third AC\n\t4)Fourth compartment is Sleeper\n\t5)Rest Are  Unreserved General Class\n");
     scanf("%d", &choosenCompartment);
+    resetColor();
+    sleepProgram(1);
     showTickets(choosenCompartment, trainId);
 }
 
 void randomlyBookSeats(int* seats, int numSeats) {
-    srand(time(NULL));  // Seed for random number generation
+    srand(time(NULL));  
     int seatsToBook = numSeats / 2;
 
     for (int i = 0; i < seatsToBook; ++i) {
         int randomSeat;
         do {
             randomSeat = rand() % numSeats;
-        } while (seats[randomSeat] == 1);  // Keep generating until an available seat is found
+        } while (seats[randomSeat] == 1);  
 
-        seats[randomSeat] = 1;  // Book the seat
+        seats[randomSeat] = 1;  
     }
 }
 
@@ -844,20 +999,18 @@ void showTickets(int choosenCompartment, const char* trainId) {
     int seats[MAX_PASSENGERS];
     int bookedSeats[MAX_PASSENGERS];
 
-    // Initialize seats to available
     for (int i = 0; i < numSeats; ++i) {
         seats[i] = 0;
     }
 
-    // Randomly book seats
     randomlyBookSeats(seats, numSeats);
 
     for (int i = 0; i < numSeats; ++i) {
         bookedSeats[i] = seats[i];
     }
 
-    // Display the ticket layout
     printf("\nYour chosen compartment is: %d", choosenCompartment);
+    sleepProgram(1);
     if (choosenCompartment == 1 || choosenCompartment == 2 || choosenCompartment == 3)
     {
     printf("\nThe seat type is: %s", "AC Seater");
@@ -868,9 +1021,11 @@ void showTickets(int choosenCompartment, const char* trainId) {
     {
     printf("\nThe seat type is: %s", "Seater");
     }
+    sleepProgram(2);
     printf("\nThe Tickets are:\n");
     printf("\t1) Red Are Booked Tickets\n");
     printf("\t2) Green Are Available Tickets\n");
+    sleepProgram(1.5);
 
     for (int i = 0; i < numSeats; ++i) {
         if (i % 6 == 0) {
@@ -891,7 +1046,8 @@ void showTickets(int choosenCompartment, const char* trainId) {
     }
 
     printf("\n");
-    printf("Enter how many tickets you want to buy: ");
+    sleepProgram(1);
+    printf("\n\n\nEnter how many tickets you want to buy: ");
     int ticketsToBuy;
     scanf("%d", &ticketsToBuy);
     printf("\n");
@@ -904,7 +1060,6 @@ void showTickets(int choosenCompartment, const char* trainId) {
             scanf("%d", &TicketsNums[i]);
             printf("\n");
 
-            // Check if the entered ticket number is valid and not already booked
             if (TicketsNums[i] < 1 || TicketsNums[i] > numSeats) {
                 printf("Invalid ticket number. Please enter a valid ticket number.\n");
             } else if (bookedSeats[TicketsNums[i] - 1] == 1) {
@@ -912,10 +1067,10 @@ void showTickets(int choosenCompartment, const char* trainId) {
             }
         } while (TicketsNums[i] < 1 || TicketsNums[i] > numSeats || bookedSeats[TicketsNums[i] - 1] == 1);
 
-        // Mark the selected ticket as booked
         bookedSeats[TicketsNums[i] - 1] = 1;
     }
 
+    sleepProgram(1);
     printf("Please Complete the payment to Confirm your bookings!!!\n");
     payNow(trainId, ticketsToBuy, choosenCompartment, TicketsNums);
 
@@ -930,13 +1085,13 @@ void payNow(const char* trainId, int ticketsToBuy, int choosenCompartment, int t
         exit(1);
     }
 
-    // Read and discard the first line (number of trains)
+    
     int numTrains;
     fscanf(file, "%d", &numTrains);
 
     Train train;
 
-    while (fscanf(file, "%s %s %s %s %d %d %s", train.trainId, train.startingPoint, train.destination, train.departureTime, &train.cost, &train.compartments, train.seatType) != EOF) {
+    while (fscanf(file, "%s %s %s %s %d %d %s %s %d %d", train.trainId, train.startingPoint, train.destination, train.departureTime, &train.cost, &train.compartments, train.seatType, train.name, &train.maxSpeed, &train.totalDist) != EOF) {
         if (strcmp(train.trainId, trainId) == 0) {
             if (choosenCompartment == 1 || choosenCompartment == 2)
             {
@@ -957,15 +1112,19 @@ void payNow(const char* trainId, int ticketsToBuy, int choosenCompartment, int t
     }
 
     fclose(file);
+    sleepProgram(1);
     printf("\nYour Total Cost Is: %2f", totalPrice);
+    sleepProgram(1);
     printf("\nPress 1 to continue to pay or press 2 to go back to ticket selection!!\n");
     scanf("%d", &wantToPay);
     if (wantToPay == 1)
     {
+    sleepProgram(1);
       paymentGateway(trainId, ticketsToBuy, choosenCompartment, totalPrice, ticketsNums);
     }
     else if (wantToPay == 2)
     {
+    sleepProgram(1);
       findTrain(trainId);
     }
 
@@ -974,10 +1133,10 @@ void payNow(const char* trainId, int ticketsToBuy, int choosenCompartment, int t
 int isAllDigits(const char *str) {
     for (int i = 0; str[i] != '\0'; i++) {
         if (!isdigit(str[i])) {
-            return 0; // Not all characters are digits
+            return 0; 
         }
     }
-    return 1; // All characters are digits
+    return 1; 
 }
 
 void paymentGateway(const char* trainId, int ticketsToBuy, int choosenCompartment, float totalPrice, int ticketsNums[MAX_PASSENGERS])
@@ -988,28 +1147,40 @@ void paymentGateway(const char* trainId, int ticketsToBuy, int choosenCompartmen
     char expiryDate[100];
     char cvv[10];
     clearTerminal();
+    sleepProgram(1);
     printf("\n\n\n\n\n==============================================================================================\n\n");
-    printf("\t\t\t\033[1;31mTrain RESERVATION\033[0m\t\t");
+    printf("\t\t\t\033[1;31mBOOKING TICKETS!!\033[0m\t\t");
     printf("\n\n==============================================================================================\n");
+    sleepProgram(1);
     printf("\n====================");
     redColor();
     printf("  PAYMENT GATEWAY  ");
     resetColor();
     printf("=====================\n\n");
     printf("   \033[1;31m[1]\033[0m CREDIT or DEBIT CARD\n\n");
+    sleepProgram(0.5);
     printf("   \033[1;31m[2]\033[0m UPI (QR CODE)\n\n");
+    sleepProgram(0.5);
     printf("   \033[1;31m[3]\033[0m CANCEL BOOKING\n\n");
+    sleepProgram(0.5);
     printf("   \033[1;31m[4]\033[0m PAYMENT INFO\n\n");
+    sleepProgram(0.5);
     printf("   \033[1;31m[5]\033[0m GO BACK TO TICKET BOOKING\n\n");
+    sleepProgram(0.5);
     printf("   \033[1;31m[6]\033[0m EXIT TO MAIN MENU\n\n");
+    printf("Please enter an option\n");
     scanf("%d", &gatewayChoice);
+    getchar();
     switch (gatewayChoice)
     {
     case 1:
       clearTerminal();
       yellowColor();
+      sleepProgram(1);
       printf("\nYou have chosen Card payment. Please enter card details to complete the payment:\n");
+      sleepProgram(1);
       printf("\nTo cancel payment please enter '7887' in card number field\n");
+      sleepProgram(1);
       resetColor();
       printf("\n\n");
 
@@ -1026,20 +1197,22 @@ void paymentGateway(const char* trainId, int ticketsToBuy, int choosenCompartmen
           }
       } while (strlen(cardNumber) != 16 || !isAllDigits(cardNumber));
 
+      sleepProgram(1);
       printf("\nEnter Expiry Date: in format (mm/yyyy) ");
       scanf("%s", expiryDate);
       do {
+          sleepProgram(1);
           printf("Enter CVV  (3 digits): ");
           scanf("%s", cvv);
           if (strlen(cvv) != 3 || !isAllDigits(cvv)) {
-              printf("Invalid card number. Please enter a valid 3-digit number.\n");
+              printf("Invalid card CVV. Please enter a valid 3-digit number.\n");
           }
       } while (strlen(cvv) != 3 || !isAllDigits(cvv));
-      printf("\n\n");
-      sleepProgram(5);
-      printf("Payment Successful");
-      printf("\nYou will be redirected to Tickets Section in 5 seconds\n");
-      sleepProgram(5);
+      printf("\n\n");PrintSleep(0.18);
+      printf("Payment Successful!!");
+      sleepProgram(1);
+      printf("\nYou will be redirected to Tickets Section in 3 seconds\n");
+      sleepProgram(3);
       confirmTickets(trainId, ticketsToBuy, choosenCompartment, ticketsNums, totalPrice);
       break;
     
@@ -1058,24 +1231,26 @@ void paymentGateway(const char* trainId, int ticketsToBuy, int choosenCompartmen
       sprintf(paymentInfo + strlen(paymentInfo), "\nTotal Cost: %.2f\n", totalPrice);
       int i = verifyByQrWithText("Your Code Is:", paymentInfo);
       free(paymentInfo);
-      if (i == 1)
-      {
+      if (i == 1) {   
+          PrintSleep(0.18);
           printf("Payment cancelled");
-          printf("\nYou will be redirected to train section in 5 seconds\n");
-          sleepProgram(5);
-          findTrain(trainId);
-      }
-      else if(i == 0)
-      {
+          printf("\nYou will be redirected to train section in 3 seconds\n");
+          sleepProgram(3);
+          trainListandBook();
+      } else if(i == 0) { 
+          PrintSleep(0.18);
           printf("Payment successful");
+          sleepProgram(1);
           confirmTickets(trainId, ticketsToBuy, choosenCompartment, ticketsNums, totalPrice);
-          printf("\nYou will be redirected to show ticket booking in 5 seconds\n");
-          sleepProgram(5);
+          printf("\nYou will be redirected to confirm ticket details in 3 seconds\n");
+          sleepProgram(3);
           confirmTickets(trainId, ticketsToBuy, choosenCompartment, ticketsNums, totalPrice);
-      }
-      else{
+      } else{
+          PrintSleep(0.18);
           printf("Payment failed");
-          printf("\nYou will be redirected to tickets section of this train in 5 seconds\n");
+          sleepProgram(1);
+          printf("\nYou will be redirected to tickets section of this train in 3 seconds\n");
+          sleepProgram(3);
           findTrain(trainId);
       }
       break;
@@ -1083,11 +1258,11 @@ void paymentGateway(const char* trainId, int ticketsToBuy, int choosenCompartmen
     case 3:
       printf("\nYou have cancelled ticket booking.\n");
       printf("\nYou will be redirected to train section in 5 seconds\n");
-      sleepProgram(5);
+      sleepProgram(3);
       findTrain(trainId);
       break;
     
-    case 4:
+    case 4:PrintSleep(0.18);
       printf("\nYour Payment Information Is As Following:\n");
       printf("Total Cost: %f\n", totalPrice);
       printf("Total Tickets: %d\n", ticketsToBuy);
@@ -1115,20 +1290,20 @@ void paymentGateway(const char* trainId, int ticketsToBuy, int choosenCompartmen
       break;
 
     case 5:
-      printf("You will be redierected to Train Section in 5 seconds.\n");
-      sleepProgram(5);
+      printf("You will be redirected to Train Section in 5 seconds.\n");
+      sleepProgram(3);
       findTrain(trainId);
       break;
     
     case 6:
-      printf("You will be redierected to main menu in 5 seconds.\n");
-      sleepProgram(5);
+      printf("You will be redirected to main menu in 3 seconds.\n");
+      sleepProgram(3);
       mainMenu();
       break;
     
     default:
-      printf("Invalid option. You will be redierected to main menu in 5 seconds.\n");
-      sleepProgram(5);
+      printf("Invalid option. You will be redirected to main menu in 3 seconds.\n");
+      sleepProgram(3);
       mainMenu();
       break;
     }
@@ -1137,10 +1312,10 @@ void paymentGateway(const char* trainId, int ticketsToBuy, int choosenCompartmen
 long long generate10DigitRandomNumber() {
     long long randomNumber = 0;
 
-    // Seed the random number generator with the current time
+    
     srand((unsigned int)time(NULL));
 
-    // Generate each digit randomly
+    
     for (int i = 0; i < 10; ++i) {
         randomNumber = randomNumber * 10 + rand() % 10;
     }
@@ -1154,7 +1329,7 @@ void writeReservationToFile(const Reservation* passenger) {
         printf("Error opening reservations file.\n");
         exit(1);
     }
-    fprintf(file, "%s %s %s %d %.2f %d %d %s %s %lld", passenger->name, passenger->userId, passenger->trainId,
+    fprintf(file, "%s %s %s %d %.2f %d %d %s %s %lld\n", passenger->name, passenger->userId, passenger->trainId,
             passenger->compartment, passenger->cost, passenger->noOfSeats, passenger->seats , passenger->seatType, passenger->status, passenger->pnr);
     fclose(file);
 }
@@ -1162,9 +1337,11 @@ void writeReservationToFile(const Reservation* passenger) {
 void confirmTickets(const char* trainId, int ticketsToBuy, int choosenCompartment, int* ticketsNums, float totalPrice) {
     int confirmedNowGoBack;
     clearTerminal();
+    sleepProgram(2);
     printf("\n\n\n\n\n==============================================================================================\n\n");
     printf("\t\t\t\033[1;31mTrain RESERVATION SUCCESSFUL\033[0m\t\t");
     printf("\n\n==============================================================================================\n");
+    sleepProgram(1);
     printf("\nPlease Enter following details to complete the booking:\n");
     long long pnr = generate10DigitRandomNumber();
 
@@ -1179,16 +1356,17 @@ void confirmTickets(const char* trainId, int ticketsToBuy, int choosenCompartmen
         passengers[i].noOfSeats = 1;
         passengers[i].seats = ticketsNums[i];
         if (choosenCompartment == 1 || choosenCompartment == 2 || choosenCompartment == 3) {
-            strcpy(passengers[i].seatType, "(AC)Seater");
+            strcpy(passengers[i].seatType, "(AC)Seater ");
         } else if (choosenCompartment == 4) {
-            strcpy(passengers[i].seatType, "Sleeper");
+            strcpy(passengers[i].seatType, "Sleeper ");
         } else {
-            strcpy(passengers[i].seatType, "Seater");
+            strcpy(passengers[i].seatType, "Seater ");
         }
         strcpy(passengers[i].status, "CONFIRMED");
         passengers[i].pnr = pnr;
         writeReservationToFile(&passengers[i]);
     }
+    PrintSleep(0.18);
     printf("\nThank You For Your Details. Your PNR is: %lld\n", pnr);
     printf("\n====================");
     redColor();
@@ -1201,18 +1379,19 @@ void confirmTickets(const char* trainId, int ticketsToBuy, int choosenCompartmen
     printf("Total Cost: %.2f\n", totalPrice);
     printf("Seat Numbers: ");
     for (int i = 0; i < ticketsToBuy; i++) {
-        printf("%d \t", ticketsNums[i]);
+        printf("%d, \t", ticketsNums[i]);
     }
     printf("\nYour PNR is %lld\n", pnr);
+    sleepProgram(2);
     printf("\nPress any key to go back to the main menu.\n");
-    scanf("%d", &confirmedNowGoBack);  // Use %d for integer input
+    scanf("%d", &confirmedNowGoBack); 
     mainMenu();
 }
 
 void PrintToBeDeletedReservation(long long pnr) {
     clearTerminal();
-    FILE* inputFile = fopen("reservations.txt", "r");
-    if (inputFile == NULL) {
+    FILE* reserFile = fopen("reservations.txt", "r");
+    if (reserFile == NULL) {
         printf("Error opening reservations file for reading.\n");
         exit(1);
     }
@@ -1220,17 +1399,16 @@ void PrintToBeDeletedReservation(long long pnr) {
     Reservation currentReservation;
     int reservationFound = 0;
 
-    while (fscanf(inputFile, "%s %s %s %d %f %d", currentReservation.name, currentReservation.userId,
+    while (fscanf(reserFile, "%s %s %s %d %f %d", currentReservation.name, currentReservation.userId,
               currentReservation.trainId, &currentReservation.compartment, &currentReservation.cost,
               &currentReservation.noOfSeats) != EOF) {
-    fscanf(inputFile, " %d", &currentReservation.seats);
+    fscanf(reserFile, " %d", &currentReservation.seats);
 
-    fscanf(inputFile, " %s %s %lld", currentReservation.seatType, currentReservation.status, &currentReservation.pnr);
+    fscanf(reserFile, " %s %s %lld", currentReservation.seatType, currentReservation.status, &currentReservation.pnr);
     
         if (currentReservation.pnr == pnr) {
             reservationFound = 1;
 
-            // Display reservation details
             printf("\nReservation Details:\n");
             printf("Name: %s\n", currentReservation.name);
             printf("Train ID: %s\n", currentReservation.trainId);
@@ -1245,7 +1423,7 @@ void PrintToBeDeletedReservation(long long pnr) {
         }
     }
 
-    fclose(inputFile);
+    fclose(reserFile);
 
     if (reservationFound) {
         printf("Do you want to cancel this reservation? (1 for yes, 0 for no): ");
@@ -1268,29 +1446,26 @@ void PrintToBeDeletedReservation(long long pnr) {
 }
 
 void deleteReservationByPnr(long long pnr) {
-    FILE* inputFile = fopen("reservations.txt", "r");
+    FILE* reserFile = fopen("reservations.txt", "r");
     FILE* tempFile = fopen("temp.txt", "w");
-    if (inputFile == NULL || tempFile == NULL) {
+    if (reserFile == NULL || tempFile == NULL) {
         printf("Error opening files for reading/writing.\n");
         exit(1);
     }
 
     Reservation currentReservation;
 
-    while (fscanf(inputFile, "%s %s %s %d %f %d", currentReservation.name, currentReservation.userId,
+    while (fscanf(reserFile, "%s %s %s %d %f %d", currentReservation.name, currentReservation.userId,
                   currentReservation.trainId, &currentReservation.compartment, &currentReservation.cost,
                   &currentReservation.noOfSeats) != EOF) {
-        // Read seat number
-        fscanf(inputFile, " %d", &currentReservation.seats);
+        fscanf(reserFile, " %d", &currentReservation.seats);
 
-        fscanf(inputFile, " %s %s %lld", currentReservation.seatType, currentReservation.status, &currentReservation.pnr);
+        fscanf(reserFile, " %s %s %lld", currentReservation.seatType, currentReservation.status, &currentReservation.pnr);
 
-        // Skip the reservation with the specified PNR
         if (currentReservation.pnr == pnr) {
             continue;
         }
 
-        // Write the reservation to the temp file
         fprintf(tempFile, "%s %s %s %d %.2f %d", currentReservation.name, currentReservation.userId,
                 currentReservation.trainId, currentReservation.compartment, currentReservation.cost,
                 currentReservation.noOfSeats);
@@ -1298,10 +1473,9 @@ void deleteReservationByPnr(long long pnr) {
         fprintf(tempFile, " %s %s %lld\n", currentReservation.seatType, currentReservation.status, currentReservation.pnr);
     }
 
-    fclose(inputFile);
+    fclose(reserFile);
     fclose(tempFile);
 
-    // Rename the temp file to the original file
     remove("reservations.txt");
     rename("temp.txt", "reservations.txt");
 }
@@ -1316,8 +1490,8 @@ void cancelBooking(){
     printf("\t\t\t\033[1;31mTrain RESERVATION CANCELLED\033[0m\t\t");
     printf("\n\n==============================================================================================\n");
     printf("\nYou have cancelled ticket booking.\n");
-    printf("\nYou will be redirected to main menu in 5 seconds\n");
-    sleepProgram(5);
+    printf("\nYou will be redirected to main menu in 3 seconds\n");
+    sleepProgram(3);
     mainMenu();
 }
 
@@ -1326,42 +1500,63 @@ void reservationInfo() {
     clearTerminal();
     printf("\nEnter PNR: ");
     scanf("%lld", &pnrInfo);
+    PrintSleep(0.18);
 
-    FILE* file = fopen("reservations.txt", "r");
-    if (file == NULL) {
+    FILE* reserFile = fopen("reservations.txt", "r");
+    if (reserFile == NULL) {
         printf("Error opening reservations file for reading.\n");
         exit(1);
     }
+    FILE* trainDetails = fopen("train.txt", "r");
+    if (trainDetails == NULL) {
+        printf("Error opening trains file for reading.\n");
+        exit(1);
+    }
+
+    int numTrains;
+    fscanf(trainDetails, "%d", &numTrains);
 
     Reservation currentReservation;
     int reservationFound = 0;
-
-    while (fscanf(file, "%s %s %s %d %f %d", currentReservation.name, currentReservation.userId, currentReservation.trainId, &currentReservation.compartment, &currentReservation.cost, &currentReservation.noOfSeats) != EOF) {
-        fscanf(file, " %d", &currentReservation.seats);  
-        fscanf(file, " %s %s %lld", currentReservation.seatType, currentReservation.status, &currentReservation.pnr);  
+    int l = 0;
+    Train train;
+    while (fscanf(reserFile, "%s %s %s %d %f %d %d %s %s %lld", currentReservation.name, currentReservation.userId, currentReservation.trainId, &currentReservation.compartment, &currentReservation.cost, &currentReservation.noOfSeats, &currentReservation.seats
+            , currentReservation.seatType, currentReservation.status, &currentReservation.pnr) != EOF) {
 
         if (currentReservation.pnr == pnrInfo) {
+                while (fscanf(trainDetails, "%s %s %s %s %d %d %s %s %d %d", train.trainId, train.startingPoint, train.destination, train.departureTime, &train.cost, &train.compartments, train.seatType, train.name, &train.maxSpeed, &train.totalDist) != EOF) {
+                if (strcmp(currentReservation.trainId, train.trainId) == 0) {
             reservationFound = 1;
-            printf("\n====================================================================\n");
-            printf("\t\t\t\033[1;31mRESERVATION INFORMATION\033[0m\t\t");
-            printf("\n====================================================================\n");
+            l++;
+            printf("\n==============================================================================================\n");
+            printf("\t\t\t\033[1;31mRESERVATION INFORMATION {TICKET %d}\033[0m\t\t", l);
+            printf("\n==============================================================================================\n");
+            sleepProgram(1);
 
-            printf("\t||\t\tPassenger Name: %s\n", currentReservation.name);
-            printf("\t||\t\tUser ID: %s\n", currentReservation.userId);
-            printf("\t||\t\tTrain ID: %s\n", currentReservation.trainId);
-            printf("\t||\t\tCompartment: %d\n", currentReservation.compartment);
-            printf("\t||\t\tCost: %.2f\n", currentReservation.cost);
-            printf("\t||\t\tNumber of Seats: %d\n", currentReservation.noOfSeats);
-            printf("\t||\t\tSeat Numbers: %d\n ", currentReservation.seats);
-            printf("\t||\t\tSeat Type: %s\n", currentReservation.seatType);
-            printf("\t||\t\tStatus: %s\n", currentReservation.status);
-            printf("\t||\t\tPNR: %lld\n", currentReservation.pnr);
-
-            printf("\n====================================================================\n");
+            printf("\t\t||\t Passenger Name: %-25s        ||\n", currentReservation.name);
+            printf("\t\t||\t User ID: %-25s               ||\n", currentReservation.userId);
+            printf("\t\t||\t Train ID: %-25s              ||\n", currentReservation.trainId);
+            printf("\t\t||\t Train Name: %-25s            ||\n", train.name);
+            printf("\t\t||\t Train Starting Point: %-25s  ||\n", train.startingPoint);
+            printf("\t\t||\t Train Destination: %-25s     ||\n", train.destination);
+            printf("\t\t||\t Compartment: %-25d           ||\n", currentReservation.compartment);
+            printf("\t\t||\t Cost: %-27.2f                ||\n", currentReservation.cost);
+            printf("\t\t||\t Number of Seats: %-25d       ||\n", currentReservation.noOfSeats);
+            printf("\t\t||\t Seat Numbers: %-25d          ||\n", currentReservation.seats);
+            printf("\t\t||\t Seat Type: %-25s             ||\n", currentReservation.seatType);
+            printf("\t\t||\t Status: %-25s                ||\n", currentReservation.status);
+            printf("\t\t||\t PNR: %-27lld                 ||\n", currentReservation.pnr);
+            printf("\n==============================================================================================\n\n");
+            fseek(trainDetails, 0, SEEK_SET);
+            fscanf(trainDetails, "%d", &numTrains);
+            break;
+                }
+            }
         }
     }
+    fclose(trainDetails);
 
-    fclose(file);
+    fclose(reserFile);
 
     if (!reservationFound) {
         printf("\nReservation with PNR %lld not found.\n", pnrInfo);
@@ -1387,25 +1582,26 @@ void reservationInfo() {
 
 void checkAllReservations() {
     clearTerminal();
-    int currentReservationFound = 0;  // Initialize to 0
+    PrintSleep(0.18);
+    int currentReservationFound = 0;  
     printf("\n==============================================================================================\n");
     printf("\t\t\t\033[1;31mALL YOUR RESERVATIONS \033[0m\t\t");
     printf("\n==============================================================================================\n");
 
-    FILE* inputFile = fopen("reservations.txt", "r");
-    if (inputFile == NULL) {
+    FILE* reserFile = fopen("reservations.txt", "r");
+    if (reserFile == NULL) {
         printf("Error opening reservations file for reading.\n");
         exit(1);
     }
-
+    sleepProgram(1);
     Reservation currentReservation;
 
     printf("\nYour Reservations:\n");
-    while (fscanf(inputFile, "%s %s %s %d %f %d", currentReservation.name, currentReservation.userId,
+    while (fscanf(reserFile, "%s %s %s %d %f %d", currentReservation.name, currentReservation.userId,
               currentReservation.trainId, &currentReservation.compartment, &currentReservation.cost,
               &currentReservation.noOfSeats) != EOF) {
-            fscanf(inputFile, " %d", &currentReservation.seats);
-            fscanf(inputFile, " %s %s %lld", currentReservation.seatType, currentReservation.status, &currentReservation.pnr);
+            fscanf(reserFile, " %d", &currentReservation.seats);
+            fscanf(reserFile, " %s %s %lld", currentReservation.seatType, currentReservation.status, &currentReservation.pnr);
 
         if (strcmp(currentReservation.userId, userIdPtr) == 0) {
             currentReservationFound = 1;
@@ -1424,7 +1620,7 @@ void checkAllReservations() {
         }
     }
 
-    fclose(inputFile);
+    fclose(reserFile);
     if (currentReservationFound == 0) {
         printf("\nYou Don't Have Any Reservations!!\n");
     }
@@ -1455,12 +1651,12 @@ void showUserInfo(){
         if (strcmp(user.userId, userId) == 0) {
             clearTerminal();
             printf("\n\n\n\n\n==============================================================================================\n\n");
-            printf("\t\t\t\033[1;31mYour Profile\033[0m\t\t");
+            printf("\t\t\t\t\t\033[1;31mYour Profile\033[0m\t\t");
             printf("\n\n==============================================================================================\n");
-            printf("User ID: %s\n", user.userId);
-            printf("Name: %s\n", user.name);
-            printf("Email: %s\n", user.email);
-            printf("Password: %s\n", user.password);
+            printf("\tUser ID: %s\n", user.userId);
+            printf("\tName: %s\n", user.name);
+            printf("\tEmail: %s\n", user.email);
+            printf("\tPassword: %s\n", user.password);
             break;
         }
     }
@@ -1477,8 +1673,8 @@ void showUserInfo(){
     }
 }
 
-
 void mainMenu(){
+    resetColor();
     int choice;
     printf("\n\n\n\n\n==============================================================================================\n\n");
     printf("\t\t\t\033[1;31mTrain RESERVATION\033[0m\t\t");
@@ -1496,9 +1692,8 @@ void mainMenu(){
     printf("   \033[1;31m[5]\033[0m SEE ALL YOUR RESERVATIONS\n\n");
     printf("   \033[1;31m[6]\033[0m LOGOUT\n\n");
     printf("   \033[1;31m[7]\033[0m DELAYED TRAIN STATUS\n\n");
-    printf("   \033[1;31m[8]\033[0m Profile\n\n");
-    printf("   \033[1;31m[9]\033[0m EXIT\n\n\n");
-    printf("   \033[1;31m[11]\033[0m ADMIN CONTROLS\n\n");
+    printf("   \033[1;31m[8]\033[0m Profile\n\n\n");
+    printf("   \033[1;31m[9]\033[0m EXIT\n\n");
     printf("\n========================================================");
     printf("\n==============================================================================================\n");
     scanf("%d", &choice);
@@ -1525,7 +1720,7 @@ void mainMenu(){
         LogOrSign();
         break;
     case 7:
-        displayDelayedTrains();
+        displayDelayedTrains(1);
         break;
     case 8:
         showUserInfo();
@@ -1533,8 +1728,9 @@ void mainMenu(){
     case 9:
         exit(0);
         break;
-    case 11:
-        adminControls();
+    default:
+        printf("\nInvalid Choice!!\n");
+        mainMenu();
         break;
     }
 }
