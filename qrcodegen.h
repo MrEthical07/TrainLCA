@@ -1432,22 +1432,24 @@ static void generateRandomCode(char *code, size_t length) {
     }
     code[length] = '\0';
 }
-static bool verifyCode(const char *generatedCode, const char *enteredCode) {
-	if (*enteredCode == 7887)
-	{
-		return 1;
-	}
-	if(strcmp(generatedCode, enteredCode) == 0)
-	{
-		return 0;
-	}
-    else
-	{
-		return 10;
-	}
+
+
+int verifyCode(const char *generatedCode, const char *enteredCode) {
+    int j;
+
+    if (strcmp(enteredCode, "7887") == 0) {
+        j = 1;
+    } else if (strcmp(generatedCode, enteredCode) == 0) {
+        j = 0;
+    } else {
+        j = 2;
+    }
+    return j;
 }
+
+
 int verifyByQrWithText(const char *beforeCode, const char *InText) {
-    char generatedCode[50];  // Assuming a maximum input length of 50 characters
+    char generatedCode[50];  
     generateRandomCode(generatedCode, 4);
     
     // Concatenate strings
@@ -1472,6 +1474,7 @@ int verifyByQrWithText(const char *beforeCode, const char *InText) {
     int result = verifyCode(generatedCode, userCode);
 	return result;
 }
+
 int verifyByQr() {
     char generatedCode[50];  // Assuming a maximum input length of 50 characters
     generateRandomCode(generatedCode, 4);
