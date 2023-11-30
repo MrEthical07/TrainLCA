@@ -63,6 +63,7 @@ typedef struct {
     float cost;
     int seats;
     int noOfSeats;
+    char date[20];
 } Reservation;
 
 typedef struct {
@@ -97,18 +98,21 @@ void trainListandBook();
 void showCompartment( int compartment,  const char* trainId);
 void showTickets( int choosenCompartment,  const char* trainId);
 void sleepProgram( float seconds);
-void payNow( const char* trainId,  int ticketsToBuy,  int choosenCompartment,  int* ticketsNums);
-void paymentGateway(const char* trainId, int ticketsToBuy, int choosenCompartment, float totalPrice, int ticketsNums[MAX_PASSENGERS]);
-void confirmTickets( const char* trainId,  int ticketsToBuy,  int choosenCompartment,  int* ticketsNums,  float totalPrice);
+void payNow( const char* trainId,  int ticketsToBuy,  int choosenCompartment,  int* ticketsNums,  const char* date);
+void paymentGateway(const char* trainId, int ticketsToBuy, int choosenCompartment, float totalPrice, int ticketsNums[MAX_PASSENGERS], const char* date);
+void confirmTickets( const char* trainId,  int ticketsToBuy,  int choosenCompartment,  int* ticketsNums,  float totalPrice, const char* date);
 void cancelTickets( const char* trainId,  int ticketsToBuy,  int choosenCompartment,  int* ticketsNums);
 void addDelayedTrain();
 void getTrainInformation( const char* trainId,  int ticketsToBuy,  int choosenCompartment,  int* ticketsNums);
 void checkAllReservations();
+void seeReservationInfo(long long pnr);
 void deleteReservationByPnr(long long pnr);
 void showUserInfo();
 void adminControls();
 void displayDelayedTrains(int isAdmin);
 void adminLogin();
+
+
 
 void sleepProgram(float seconds) 
 {
@@ -840,11 +844,12 @@ void displayDelayedTrains(int isAdmin) {
 void trainListandBook(){
   displayAllTrains();
         int ifSort;
+        printf("\nThese trains are daily available trains!! Enter your preferred date of travel on ticket selection section!! \n");
         printf("Do you want to sort trains? (1 for yes) Or Press 2 for ticket booking Or Press anu other key to go back to main menu: ");
         scanf("%d", &ifSort);
         if (ifSort == 1) {
             yellowColor();
-            printf("\n\nDo you want to sort by cost? (1 for ascending, 2 for descinding) Or Do you want to sort based on destination or starting point? (3 for destination, 4 for starting point) Or press any other key to go back to main menu: ");
+            printf("\n\nDo you want to sort by cost? (1 for ascending, 2 for descinding) Or Do you want to sort based on destination or starting point? (3 for destination, 4 for starting point) Or press any other key to go back to train list: ");
             int sortChoice;
             scanf("%d", &sortChoice);
             if (sortChoice == 1) {
@@ -874,7 +879,7 @@ void trainListandBook(){
             }
             else{
                 resetColor();
-              mainMenu();
+                trainListandBook();
             }
         }
         else if (ifSort == 2)
@@ -886,6 +891,7 @@ void trainListandBook(){
           findTrain(trainId);
         }
         else{
+          sleepProgram(1);
           mainMenu();
         }
 }
@@ -963,7 +969,15 @@ void showCompartment( int compartment, const char* trainId){
     sleepProgram(1);
     printf("\n\n\nPlease Enter Your Preferred Compartment:");
     yellowColor();
-    printf("\n\t1)First compartment is First AC\n\t2)Second compartment is Exectuive Class\n\t3)Third compartment is Third AC\n\t4)Fourth compartment is Sleeper\n\t5)Rest Are  Unreserved General Class\n");
+    printf("\n\t1)First compartment is First AC");
+    sleepProgram(0.5);
+    printf("\n\t2)Second compartment is Exectuive Class");
+    sleepProgram(0.5);
+    printf("\n\t3)Third compartment is Third AC");
+    sleepProgram(0.5);
+    printf("\n\t4)Fourth compartment is Sleeper");
+    sleepProgram(0.5);
+    printf("\n\t5)Rest Are  Unreserved General Class\n");
     scanf("%d", &choosenCompartment);
     resetColor();
     sleepProgram(1);
@@ -984,8 +998,48 @@ void randomlyBookSeats(int* seats, int numSeats) {
     }
 }
 
+int isValidDate(const char *dateStr) {
+    struct tm userDate = {0};
+
+    if (sscanf(dateStr, "%d/%d/%d", &userDate.tm_mday, &userDate.tm_mon, &userDate.tm_year) != 3) {
+        
+        return 0;
+    }
+
+    userDate.tm_mon -= 1;  
+    userDate.tm_year -= 1900;  
+
+    time_t currentTime = time(NULL);
+    struct tm *currentDate = localtime(&currentTime);
+
+    time_t userTime = mktime(&userDate);
+
+    if (userTime == -1 || userTime < currentTime) {
+       
+        return 0;
+    }
+
+    return 1; 
+}
+
 void showTickets(int choosenCompartment, const char* trainId) {
   int numSeats = 0;
+
+    char date[20];
+    int isValid = 0;
+
+    do {
+        printf("Enter Your Departure Date in dd/mm/yyyy format: ");
+        scanf("%99s", date);
+
+        isValid = isValidDate(date);
+
+        if (!isValid) {
+            printf("Invalid date or date is in the past. Please enter a valid future date.\n");
+        }
+
+    } while (!isValid);
+    
     if (choosenCompartment == 1 || choosenCompartment == 2 || choosenCompartment == 3)
     {
        numSeats = 54;
@@ -1010,7 +1064,7 @@ void showTickets(int choosenCompartment, const char* trainId) {
     }
 
     printf("\nYour chosen compartment is: %d", choosenCompartment);
-    sleepProgram(1);
+    sleepProgram(0.5);
     if (choosenCompartment == 1 || choosenCompartment == 2 || choosenCompartment == 3)
     {
     printf("\nThe seat type is: %s", "AC Seater");
@@ -1021,7 +1075,8 @@ void showTickets(int choosenCompartment, const char* trainId) {
     {
     printf("\nThe seat type is: %s", "Seater");
     }
-    sleepProgram(2);
+    printf("\nYour travel date is: %s", date);
+    sleepProgram(1);
     printf("\nThe Tickets are:\n");
     printf("\t1) Red Are Booked Tickets\n");
     printf("\t2) Green Are Available Tickets\n");
@@ -1072,11 +1127,11 @@ void showTickets(int choosenCompartment, const char* trainId) {
 
     sleepProgram(1);
     printf("Please Complete the payment to Confirm your bookings!!!\n");
-    payNow(trainId, ticketsToBuy, choosenCompartment, TicketsNums);
+    payNow(trainId, ticketsToBuy, choosenCompartment, TicketsNums, date);
 
 }
 
-void payNow(const char* trainId, int ticketsToBuy, int choosenCompartment, int ticketsNums[MAX_PASSENGERS]) {
+void payNow(const char* trainId, int ticketsToBuy, int choosenCompartment, int ticketsNums[MAX_PASSENGERS], const char* date) {
     float totalPrice = 0;
     int wantToPay;
     FILE* file = fopen("train.txt", "r");
@@ -1113,14 +1168,14 @@ void payNow(const char* trainId, int ticketsToBuy, int choosenCompartment, int t
 
     fclose(file);
     sleepProgram(1);
-    printf("\nYour Total Cost Is: %2f", totalPrice);
+    printf("\nYour Total Cost Is: %2f\n", totalPrice);
     sleepProgram(1);
     printf("\nPress 1 to continue to pay or press 2 to go back to ticket selection!!\n");
     scanf("%d", &wantToPay);
     if (wantToPay == 1)
     {
     sleepProgram(1);
-      paymentGateway(trainId, ticketsToBuy, choosenCompartment, totalPrice, ticketsNums);
+      paymentGateway(trainId, ticketsToBuy, choosenCompartment, totalPrice, ticketsNums, date);
     }
     else if (wantToPay == 2)
     {
@@ -1139,7 +1194,7 @@ int isAllDigits(const char *str) {
     return 1; 
 }
 
-void paymentGateway(const char* trainId, int ticketsToBuy, int choosenCompartment, float totalPrice, int ticketsNums[MAX_PASSENGERS])
+void paymentGateway(const char* trainId, int ticketsToBuy, int choosenCompartment, float totalPrice, int ticketsNums[MAX_PASSENGERS], const char* date)
   {
     int gatewayChoice;
     int wantToPay;
@@ -1213,7 +1268,7 @@ void paymentGateway(const char* trainId, int ticketsToBuy, int choosenCompartmen
       sleepProgram(1);
       printf("\nYou will be redirected to Tickets Section in 3 seconds\n");
       sleepProgram(3);
-      confirmTickets(trainId, ticketsToBuy, choosenCompartment, ticketsNums, totalPrice);
+      confirmTickets(trainId, ticketsToBuy, choosenCompartment, ticketsNums, totalPrice, date);
       break;
     
     case 2:
@@ -1229,7 +1284,7 @@ void paymentGateway(const char* trainId, int ticketsToBuy, int choosenCompartmen
       printf("\n\n");
       char* paymentInfo = calloc(1000, sizeof(char));
       sprintf(paymentInfo + strlen(paymentInfo), "\nTotal Cost: %.2f\n", totalPrice);
-      int i = verifyByQrWithText("Your Code Is:", paymentInfo);
+      int i = verifyByQrWithText("Your OTP Is:", paymentInfo);
       free(paymentInfo);
       if (i == 1) {   
           PrintSleep(0.18);
@@ -1240,11 +1295,9 @@ void paymentGateway(const char* trainId, int ticketsToBuy, int choosenCompartmen
       } else if(i == 0) { 
           PrintSleep(0.18);
           printf("Payment successful");
-          sleepProgram(1);
-          confirmTickets(trainId, ticketsToBuy, choosenCompartment, ticketsNums, totalPrice);
-          printf("\nYou will be redirected to confirm ticket details in 3 seconds\n");
-          sleepProgram(3);
-          confirmTickets(trainId, ticketsToBuy, choosenCompartment, ticketsNums, totalPrice);
+          printf("\nYou will be redirected to confirm ticket details in 2 seconds\n");
+          sleepProgram(1.5);
+          confirmTickets(trainId, ticketsToBuy, choosenCompartment, ticketsNums, totalPrice, date);
       } else{
           PrintSleep(0.18);
           printf("Payment failed");
@@ -1262,7 +1315,8 @@ void paymentGateway(const char* trainId, int ticketsToBuy, int choosenCompartmen
       findTrain(trainId);
       break;
     
-    case 4:PrintSleep(0.18);
+    case 4:
+      PrintSleep(0.18);
       printf("\nYour Payment Information Is As Following:\n");
       printf("Total Cost: %f\n", totalPrice);
       printf("Total Tickets: %d\n", ticketsToBuy);
@@ -1278,11 +1332,12 @@ void paymentGateway(const char* trainId, int ticketsToBuy, int choosenCompartmen
       {
       printf("\nThe seat type is: %s", "Seater");
       }
+      printf("\nYour chosen date of travel is: %s\n", date);
       printf("\nPress 1 to continue to payment or press any other key to go back to main menu.\n");
       scanf("%d", &wantToPay);
       if (wantToPay == 1)
       {
-          paymentGateway(trainId, ticketsToBuy, choosenCompartment, totalPrice, ticketsNums);
+          paymentGateway(trainId, ticketsToBuy, choosenCompartment, totalPrice, ticketsNums, date);
       } else
       {
           mainMenu();
@@ -1290,7 +1345,7 @@ void paymentGateway(const char* trainId, int ticketsToBuy, int choosenCompartmen
       break;
 
     case 5:
-      printf("You will be redirected to Train Section in 5 seconds.\n");
+      printf("You will be redirected to Train Section in 3 seconds.\n");
       sleepProgram(3);
       findTrain(trainId);
       break;
@@ -1329,12 +1384,13 @@ void writeReservationToFile(const Reservation* passenger) {
         printf("Error opening reservations file.\n");
         exit(1);
     }
-    fprintf(file, "%s %s %s %d %.2f %d %d %s %s %lld\n", passenger->name, passenger->userId, passenger->trainId,
-            passenger->compartment, passenger->cost, passenger->noOfSeats, passenger->seats , passenger->seatType, passenger->status, passenger->pnr);
+        fprintf(file, "%s %s %s %d %.2f %d %d %s %s %lld %s\n", passenger->name, passenger->userId, passenger->trainId,
+            passenger->compartment, passenger->cost, passenger->noOfSeats, passenger->seats, passenger->seatType, passenger->status, passenger->pnr, passenger->date);
+
     fclose(file);
 }
 
-void confirmTickets(const char* trainId, int ticketsToBuy, int choosenCompartment, int* ticketsNums, float totalPrice) {
+void confirmTickets(const char* trainId, int ticketsToBuy, int choosenCompartment, int* ticketsNums, float totalPrice, const char* date) {
     int confirmedNowGoBack;
     clearTerminal();
     sleepProgram(2);
@@ -1364,6 +1420,7 @@ void confirmTickets(const char* trainId, int ticketsToBuy, int choosenCompartmen
         }
         strcpy(passengers[i].status, "CONFIRMED");
         passengers[i].pnr = pnr;
+        strcpy(passengers[i].date, date);
         writeReservationToFile(&passengers[i]);
     }
     PrintSleep(0.18);
@@ -1377,15 +1434,17 @@ void confirmTickets(const char* trainId, int ticketsToBuy, int choosenCompartmen
     printf("Compartment: %d\n", choosenCompartment);
     printf("Total Tickets: %d\n", ticketsToBuy);
     printf("Total Cost: %.2f\n", totalPrice);
+    printf("Your chosen date of travel is: %s\n", date);
     printf("Seat Numbers: ");
     for (int i = 0; i < ticketsToBuy; i++) {
         printf("%d, \t", ticketsNums[i]);
     }
     printf("\nYour PNR is %lld\n", pnr);
+    printf("\n");
+    sleepProgram(1);
+    printf("\nYou will be redirected to reservation section in 5 seconds!!\n");
     sleepProgram(2);
-    printf("\nPress any key to go back to the main menu.\n");
-    scanf("%d", &confirmedNowGoBack); 
-    mainMenu();
+    seeReservationInfo(pnr);
 }
 
 void PrintToBeDeletedReservation(long long pnr) {
@@ -1404,7 +1463,7 @@ void PrintToBeDeletedReservation(long long pnr) {
               &currentReservation.noOfSeats) != EOF) {
     fscanf(reserFile, " %d", &currentReservation.seats);
 
-    fscanf(reserFile, " %s %s %lld", currentReservation.seatType, currentReservation.status, &currentReservation.pnr);
+    fscanf(reserFile, " %s %s %lld %s", currentReservation.seatType, currentReservation.status, &currentReservation.pnr, currentReservation.date);
     
         if (currentReservation.pnr == pnr) {
             reservationFound = 1;
@@ -1418,6 +1477,7 @@ void PrintToBeDeletedReservation(long long pnr) {
             printf("Seat Numbers: %d \n", currentReservation.seats);
             printf("Seat Type: %s\n", currentReservation.seatType);
             printf("Status: %s\n", currentReservation.status);
+            printf("Date: %s\n", currentReservation.date);
             printf("PNR: %lld\n", currentReservation.pnr);
             printf("\n");
         }
@@ -1460,7 +1520,7 @@ void deleteReservationByPnr(long long pnr) {
                   &currentReservation.noOfSeats) != EOF) {
         fscanf(reserFile, " %d", &currentReservation.seats);
 
-        fscanf(reserFile, " %s %s %lld", currentReservation.seatType, currentReservation.status, &currentReservation.pnr);
+        fscanf(reserFile, " %s %s %lld %s", currentReservation.seatType, currentReservation.status, &currentReservation.pnr, currentReservation.date);
 
         if (currentReservation.pnr == pnr) {
             continue;
@@ -1470,7 +1530,7 @@ void deleteReservationByPnr(long long pnr) {
                 currentReservation.trainId, currentReservation.compartment, currentReservation.cost,
                 currentReservation.noOfSeats);
         fprintf(tempFile, " %d", currentReservation.seats);
-        fprintf(tempFile, " %s %s %lld\n", currentReservation.seatType, currentReservation.status, currentReservation.pnr);
+        fprintf(tempFile, " %s %s %lld %s\n", currentReservation.seatType, currentReservation.status, currentReservation.pnr, currentReservation.date);
     }
 
     fclose(reserFile);
@@ -1493,6 +1553,77 @@ void cancelBooking(){
     printf("\nYou will be redirected to main menu in 3 seconds\n");
     sleepProgram(3);
     mainMenu();
+}
+
+void seeReservationInfo(long long pnrInfo) {
+    clearTerminal();
+    PrintSleep(0.18);
+
+    FILE* reserFile = fopen("reservations.txt", "r");
+    if (reserFile == NULL) {
+        printf("Error opening reservations file for reading.\n");
+        exit(1);
+    }
+    FILE* trainDetails = fopen("train.txt", "r");
+    if (trainDetails == NULL) {
+        printf("Error opening trains file for reading.\n");
+        exit(1);
+    }
+
+    int numTrains;
+    fscanf(trainDetails, "%d", &numTrains);
+
+    Reservation currentReservation;
+    int reservationFound = 0;
+    int l = 0;
+    Train train;
+    while (fscanf(reserFile, "%s %s %s %d %f %d %d %s %s %lld %s", currentReservation.name, currentReservation.userId, currentReservation.trainId, &currentReservation.compartment, &currentReservation.cost, &currentReservation.noOfSeats, &currentReservation.seats
+            , currentReservation.seatType, currentReservation.status, &currentReservation.pnr, currentReservation.date) != EOF) {
+
+        if (currentReservation.pnr == pnrInfo) {
+                while (fscanf(trainDetails, "%s %s %s %s %d %d %s %s %d %d", train.trainId, train.startingPoint, train.destination, train.departureTime, &train.cost, &train.compartments, train.seatType, train.name, &train.maxSpeed, &train.totalDist) != EOF) {
+                if (strcmp(currentReservation.trainId, train.trainId) == 0) {
+            reservationFound = 1;
+            l++;
+            printf("\n==============================================================================================\n");
+            printf("\t\t\t\033[1;31mRESERVATION INFORMATION {TICKET %d}\033[0m\t\t", l);
+            printf("\n==============================================================================================\n");
+            sleepProgram(1);
+
+            printf("\t\t||\t Passenger Name: %-25s        ||\n", currentReservation.name);
+            printf("\t\t||\t User ID: %-25s               ||\n", currentReservation.userId);
+            printf("\t\t||\t Train ID: %-25s              ||\n", currentReservation.trainId);
+            printf("\t\t||\t Train Name: %-25s            ||\n", train.name);
+            printf("\t\t||\t Train Starting Point: %-25s  ||\n", train.startingPoint);
+            printf("\t\t||\t Train Destination: %-25s     ||\n", train.destination);
+            printf("\t\t||\t Compartment: %-25d           ||\n", currentReservation.compartment);
+            printf("\t\t||\t Cost: %-27.2f                ||\n", currentReservation.cost);
+            printf("\t\t||\t Number of Seats: %-25d       ||\n", currentReservation.noOfSeats);
+            printf("\t\t||\t Seat Numbers: %-25d          ||\n", currentReservation.seats);
+            printf("\t\t||\t Seat Type: %-25s             ||\n", currentReservation.seatType);
+            printf("\t\t||\t Status: %-25s                ||\n", currentReservation.status);
+            printf("\t\t||\t Date Of Departure: %-25s     ||\n", currentReservation.date);
+            printf("\t\t||\t PNR: %-27lld                 ||\n", currentReservation.pnr);
+            printf("\n==============================================================================================\n\n");
+            fseek(trainDetails, 0, SEEK_SET);
+            fscanf(trainDetails, "%d", &numTrains);
+            break;
+                }
+            }
+        }
+    }
+    fclose(trainDetails);
+
+    fclose(reserFile);
+
+    printf("\nPress any key to go back to the main menu.\n");
+    int reservationFoundPrintChoice;
+    scanf("%d", &reservationFoundPrintChoice);
+    if (reservationFoundPrintChoice == 1) {
+        mainMenu();
+    } else {
+        mainMenu();
+    }
 }
 
 void reservationInfo() {
@@ -1520,8 +1651,8 @@ void reservationInfo() {
     int reservationFound = 0;
     int l = 0;
     Train train;
-    while (fscanf(reserFile, "%s %s %s %d %f %d %d %s %s %lld", currentReservation.name, currentReservation.userId, currentReservation.trainId, &currentReservation.compartment, &currentReservation.cost, &currentReservation.noOfSeats, &currentReservation.seats
-            , currentReservation.seatType, currentReservation.status, &currentReservation.pnr) != EOF) {
+    while (fscanf(reserFile, "%s %s %s %d %f %d %d %s %s %lld %s", currentReservation.name, currentReservation.userId, currentReservation.trainId, &currentReservation.compartment, &currentReservation.cost, &currentReservation.noOfSeats, &currentReservation.seats
+            , currentReservation.seatType, currentReservation.status, &currentReservation.pnr, currentReservation.date) != EOF) {
 
         if (currentReservation.pnr == pnrInfo) {
                 while (fscanf(trainDetails, "%s %s %s %s %d %d %s %s %d %d", train.trainId, train.startingPoint, train.destination, train.departureTime, &train.cost, &train.compartments, train.seatType, train.name, &train.maxSpeed, &train.totalDist) != EOF) {
@@ -1545,6 +1676,7 @@ void reservationInfo() {
             printf("\t\t||\t Seat Numbers: %-25d          ||\n", currentReservation.seats);
             printf("\t\t||\t Seat Type: %-25s             ||\n", currentReservation.seatType);
             printf("\t\t||\t Status: %-25s                ||\n", currentReservation.status);
+            printf("\t\t||\t Date Of Departure: %-25s     ||\n", currentReservation.date);
             printf("\t\t||\t PNR: %-27lld                 ||\n", currentReservation.pnr);
             printf("\n==============================================================================================\n\n");
             fseek(trainDetails, 0, SEEK_SET);
@@ -1601,7 +1733,7 @@ void checkAllReservations() {
               currentReservation.trainId, &currentReservation.compartment, &currentReservation.cost,
               &currentReservation.noOfSeats) != EOF) {
             fscanf(reserFile, " %d", &currentReservation.seats);
-            fscanf(reserFile, " %s %s %lld", currentReservation.seatType, currentReservation.status, &currentReservation.pnr);
+            fscanf(reserFile, " %s %s %lld %s", currentReservation.seatType, currentReservation.status, &currentReservation.pnr, currentReservation.date);
 
         if (strcmp(currentReservation.userId, userIdPtr) == 0) {
             currentReservationFound = 1;
@@ -1615,6 +1747,7 @@ void checkAllReservations() {
             printf("\n");
             printf("Seat Type: %s\n", currentReservation.seatType);
             printf("Status: %s\n", currentReservation.status);
+            printf("Date: %s\n", currentReservation.date);
             printf("PNR: %lld\n", currentReservation.pnr);
             printf("\n");
         }
