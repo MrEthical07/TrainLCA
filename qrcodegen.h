@@ -1467,7 +1467,7 @@ int verifyByQrWithText(const char *beforeCode, const char *InText) {
 
     // Ask the user to enter the code
     char userCode[5];
-    printf("\nEnter the 4-digit code: ");
+    printf("\nEnter the 4-digit otp: ");
     scanf("%4s", userCode);
 
     // Verify the entered code

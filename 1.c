@@ -37,6 +37,9 @@ typedef struct {
     char email[100];
     char password[100];
     char name[100];
+    int age;
+    char gender[10];
+    long long phone;
 } User;
 
 typedef struct {
@@ -64,6 +67,9 @@ typedef struct {
     int seats;
     int noOfSeats;
     char date[20];
+    int age;
+    char gender[10];
+    long long phone;
 } Reservation;
 
 typedef struct {
@@ -111,7 +117,7 @@ void showUserInfo();
 void adminControls();
 void displayDelayedTrains(int isAdmin);
 void adminLogin();
-
+void changeUserInfo();
 
 
 void sleepProgram(float seconds) 
@@ -180,8 +186,17 @@ void signup() {
     }
     
     User newUser;
-    printf("\nPlease enter your name: ");
+    printf("Please enter your name: ");
     scanf("%s", newUser.name);
+
+    printf("Please enter your Age: ");
+    scanf("%d", &newUser.age);
+
+    printf("Please enter your Gender: ");
+    scanf("%s", newUser.gender);
+    
+    printf("Please enter your Phone: ");
+    scanf("%lld", &newUser.phone);
 
     printf("Please enter your email: ");
     scanf("%s", newUser.email);
@@ -202,12 +217,15 @@ void signup() {
 
     sprintf(newUser.userId, "%08d", rand() % 100000000);
 
-    fprintf(file, "%s %s %s %s\n", newUser.userId, newUser.email, newUser.password, newUser.name);
+    fprintf(file, "%s %s %s %s %d %s %lld\n", newUser.userId, newUser.email, newUser.password, newUser.name, newUser.age, newUser.gender, newUser.phone);
     printf("\nNew user created successfully!\n");
     printf("\nHere are user Details:\n");
     printf("User ID: %s\n", newUser.userId);
     printf("Email: %s\n", newUser.email);
     printf("Name: %s\n", newUser.name);
+    printf("Age: %d\n", newUser.age);
+    printf("Gender: %s\n", newUser.gender);
+    printf("Phone Number: +91 %lld\n", newUser.phone);
     fclose(file);
 
     printf("\nAccount created successfully! Please log in.\n");
@@ -230,7 +248,7 @@ int userExists(const char* email) {
     char line[500];
     while (fgets(line, sizeof(line), file) != NULL) {
         User user;
-        sscanf(line, "%s %s %s %s", user.userId, user.email, user.password, user.name);
+        sscanf(line, "%s %s %s %s %d %s %lld", user.userId, user.email, user.password, user.name, &user.age, user.gender, &user.phone);
 
         if (strcmp(user.email, email) == 0) {
             fclose(file);
@@ -265,7 +283,7 @@ void login() {
     int userFound = 0;
     while (fgets(line, sizeof(line), file) != NULL) {
         User user;
-        sscanf(line, "%s %s %s %s", user.userId, user.email, user.password, user.name);
+        sscanf(line, "%s %s %s %s %d %s %lld", user.userId, user.email, user.password, user.name, &user.age, user.gender, &user.phone);
 
         if (strcmp(user.email, email) == 0) {
             userFound = 1;
@@ -277,6 +295,7 @@ void login() {
                 printf("\nLogin successful!\n");
                 *loggedPtr = 1;
                 strcpy(userIdPtr, user.userId);
+                printf("%s", userId);
                 yellowColor();
                 printf("\n\t\t\tYou are logged in and can proceed to book tickets!!");
                 resetColor();
@@ -352,7 +371,7 @@ void resetPass() {
     int userFound = 0;
     while (fgets(line, sizeof(line), file) != NULL) {
         User user;
-        sscanf(line, "%s %s %s %s", user.userId, user.email, user.password, user.name);
+        sscanf(line, "%s %s %s %s %d %s %lld", user.userId, user.email, user.password, user.name, &user.age, user.gender, &user.phone);
         
         if (strcmp(user.email, email) == 0) {
             userFound = 1;
@@ -364,7 +383,7 @@ void resetPass() {
             strcpy(user.password, newPassword);
         }
 
-        fprintf(tempFile, "%s %s %s %s\n", user.userId, user.email, user.password, user.name);
+        fprintf(tempFile, "%s %s %s %s %d %s %lld\n", user.userId, user.email, user.password, user.name, user.age, user.gender, user.phone);
     }
 
     fclose(file);
@@ -1384,8 +1403,8 @@ void writeReservationToFile(const Reservation* passenger) {
         printf("Error opening reservations file.\n");
         exit(1);
     }
-        fprintf(file, "%s %s %s %d %.2f %d %d %s %s %lld %s\n", passenger->name, passenger->userId, passenger->trainId,
-            passenger->compartment, passenger->cost, passenger->noOfSeats, passenger->seats, passenger->seatType, passenger->status, passenger->pnr, passenger->date);
+        fprintf(file, "%s %s %s %d %.2f %d %d %s %s %lld %s %s %d %lld\n", passenger->name, passenger->userId, passenger->trainId,
+            passenger->compartment, passenger->cost, passenger->noOfSeats, passenger->seats, passenger->seatType, passenger->status, passenger->pnr, passenger->date, passenger->gender, passenger->age, passenger->phone);
 
     fclose(file);
 }
@@ -1405,6 +1424,12 @@ void confirmTickets(const char* trainId, int ticketsToBuy, int choosenCompartmen
     for (int i = 0; i < ticketsToBuy; ++i) {
         printf("Enter passenger name for Seat %2d: ", i + 1);
         scanf("%s", passengers[i].name);
+        printf("Enter passenger gender for Seat %2d: ", i + 1);
+        scanf("%s", passengers[i].gender);
+        printf("Enter passenger age for Seat %2d: ", i + 1);
+        scanf("%d", &passengers[i].age);
+        printf("Enter passenger Mobile Number for Seat %2d: ", i + 1);
+        scanf("%lld", &passengers[i].phone);
         strcpy(passengers[i].userId, userIdPtr);
         strcpy(passengers[i].trainId, trainId);
         passengers[i].compartment = choosenCompartment;
@@ -1443,7 +1468,7 @@ void confirmTickets(const char* trainId, int ticketsToBuy, int choosenCompartmen
     printf("\n");
     sleepProgram(1);
     printf("\nYou will be redirected to reservation section in 5 seconds!!\n");
-    sleepProgram(2);
+    sleepProgram(5);
     seeReservationInfo(pnr);
 }
 
@@ -1458,18 +1483,18 @@ void PrintToBeDeletedReservation(long long pnr) {
     Reservation currentReservation;
     int reservationFound = 0;
 
-    while (fscanf(reserFile, "%s %s %s %d %f %d", currentReservation.name, currentReservation.userId,
+    while (fscanf(reserFile, "%s %s %s %d %f %d %d %s %s %lld %s %s %d %lld", currentReservation.name, currentReservation.userId,
               currentReservation.trainId, &currentReservation.compartment, &currentReservation.cost,
-              &currentReservation.noOfSeats) != EOF) {
-    fscanf(reserFile, " %d", &currentReservation.seats);
+              &currentReservation.noOfSeats, &currentReservation.seats , currentReservation.seatType, currentReservation.status, &currentReservation.pnr, currentReservation.date, currentReservation.gender, &currentReservation.age, &currentReservation.phone) != EOF) {
 
-    fscanf(reserFile, " %s %s %lld %s", currentReservation.seatType, currentReservation.status, &currentReservation.pnr, currentReservation.date);
-    
         if (currentReservation.pnr == pnr) {
             reservationFound = 1;
 
             printf("\nReservation Details:\n");
             printf("Name: %s\n", currentReservation.name);
+            printf("Gender: %s\n", currentReservation.gender);
+            printf("Age: %d\n", currentReservation.age);
+            printf("Phone: +91 %lld\n", currentReservation.phone);
             printf("Train ID: %s\n", currentReservation.trainId);
             printf("Compartment: %d\n", currentReservation.compartment);
             printf("Cost: %.2f\n", currentReservation.cost);
@@ -1515,24 +1540,22 @@ void deleteReservationByPnr(long long pnr) {
 
     Reservation currentReservation;
 
-    while (fscanf(reserFile, "%s %s %s %d %f %d", currentReservation.name, currentReservation.userId,
-                  currentReservation.trainId, &currentReservation.compartment, &currentReservation.cost,
-                  &currentReservation.noOfSeats) != EOF) {
-        fscanf(reserFile, " %d", &currentReservation.seats);
 
-        fscanf(reserFile, " %s %s %lld %s", currentReservation.seatType, currentReservation.status, &currentReservation.pnr, currentReservation.date);
+    while (fscanf(reserFile, "%s %s %s %d %f %d %d %s %s %lld %s %s %d %lld", currentReservation.name, currentReservation.userId,
+              currentReservation.trainId, &currentReservation.compartment, &currentReservation.cost,
+              &currentReservation.noOfSeats, &currentReservation.seats , currentReservation.seatType, currentReservation.status, &currentReservation.pnr, currentReservation.date, currentReservation.gender, &currentReservation.age, &currentReservation.phone) != EOF) {
 
         if (currentReservation.pnr == pnr) {
             continue;
         }
 
-        fprintf(tempFile, "%s %s %s %d %.2f %d", currentReservation.name, currentReservation.userId,
-                currentReservation.trainId, currentReservation.compartment, currentReservation.cost,
-                currentReservation.noOfSeats);
-        fprintf(tempFile, " %d", currentReservation.seats);
-        fprintf(tempFile, " %s %s %lld %s\n", currentReservation.seatType, currentReservation.status, currentReservation.pnr, currentReservation.date);
-    }
 
+    while (fscanf(tempFile, "%s %s %s %d %f %d %d %s %s %lld %s %s %d %lld", currentReservation.name, currentReservation.userId,
+              currentReservation.trainId, &currentReservation.compartment, &currentReservation.cost,
+              &currentReservation.noOfSeats, &currentReservation.seats , currentReservation.seatType, currentReservation.status, &currentReservation.pnr, currentReservation.date, currentReservation.gender, &currentReservation.age, &currentReservation.phone) != EOF) {
+
+            }
+    }
     fclose(reserFile);
     fclose(tempFile);
 
@@ -1577,8 +1600,11 @@ void seeReservationInfo(long long pnrInfo) {
     int reservationFound = 0;
     int l = 0;
     Train train;
-    while (fscanf(reserFile, "%s %s %s %d %f %d %d %s %s %lld %s", currentReservation.name, currentReservation.userId, currentReservation.trainId, &currentReservation.compartment, &currentReservation.cost, &currentReservation.noOfSeats, &currentReservation.seats
-            , currentReservation.seatType, currentReservation.status, &currentReservation.pnr, currentReservation.date) != EOF) {
+
+    while (fscanf(reserFile, "%s %s %s %d %f %d %d %s %s %lld %s %s %d %lld", currentReservation.name, currentReservation.userId,
+              currentReservation.trainId, &currentReservation.compartment, &currentReservation.cost,
+              &currentReservation.noOfSeats, &currentReservation.seats , currentReservation.seatType, currentReservation.status, &currentReservation.pnr, currentReservation.date, currentReservation.gender, &currentReservation.age, &currentReservation.phone) != EOF) {
+
 
         if (currentReservation.pnr == pnrInfo) {
                 while (fscanf(trainDetails, "%s %s %s %s %d %d %s %s %d %d", train.trainId, train.startingPoint, train.destination, train.departureTime, &train.cost, &train.compartments, train.seatType, train.name, &train.maxSpeed, &train.totalDist) != EOF) {
@@ -1591,6 +1617,9 @@ void seeReservationInfo(long long pnrInfo) {
             sleepProgram(1);
 
             printf("\t\t||\t Passenger Name: %-25s        ||\n", currentReservation.name);
+            printf("\t\t||\t Passenger Age: %-25d         ||\n", currentReservation.age);
+            printf("\t\t||\t Passenger Gender: %-25s      ||\n", currentReservation.gender);
+            printf("\t\t||\t Passenger Phone: %-27lld     ||\n", currentReservation.phone);
             printf("\t\t||\t User ID: %-25s               ||\n", currentReservation.userId);
             printf("\t\t||\t Train ID: %-25s              ||\n", currentReservation.trainId);
             printf("\t\t||\t Train Name: %-25s            ||\n", train.name);
@@ -1651,8 +1680,11 @@ void reservationInfo() {
     int reservationFound = 0;
     int l = 0;
     Train train;
-    while (fscanf(reserFile, "%s %s %s %d %f %d %d %s %s %lld %s", currentReservation.name, currentReservation.userId, currentReservation.trainId, &currentReservation.compartment, &currentReservation.cost, &currentReservation.noOfSeats, &currentReservation.seats
-            , currentReservation.seatType, currentReservation.status, &currentReservation.pnr, currentReservation.date) != EOF) {
+
+    while (fscanf(reserFile, "%s %s %s %d %f %d %d %s %s %lld %s %s %d %lld", currentReservation.name, currentReservation.userId,
+              currentReservation.trainId, &currentReservation.compartment, &currentReservation.cost,
+              &currentReservation.noOfSeats, &currentReservation.seats , currentReservation.seatType, currentReservation.status, &currentReservation.pnr, currentReservation.date, currentReservation.gender, &currentReservation.age, &currentReservation.phone) != EOF) {
+
 
         if (currentReservation.pnr == pnrInfo) {
                 while (fscanf(trainDetails, "%s %s %s %s %d %d %s %s %d %d", train.trainId, train.startingPoint, train.destination, train.departureTime, &train.cost, &train.compartments, train.seatType, train.name, &train.maxSpeed, &train.totalDist) != EOF) {
@@ -1665,6 +1697,9 @@ void reservationInfo() {
             sleepProgram(1);
 
             printf("\t\t||\t Passenger Name: %-25s        ||\n", currentReservation.name);
+            printf("\t\t||\t Passenger Age: %-25d         ||\n", currentReservation.age);
+            printf("\t\t||\t Passenger Gender: %-25s      ||\n", currentReservation.gender);
+            printf("\t\t||\t Passenger Phone: %-27lld     ||\n", currentReservation.phone);
             printf("\t\t||\t User ID: %-25s               ||\n", currentReservation.userId);
             printf("\t\t||\t Train ID: %-25s              ||\n", currentReservation.trainId);
             printf("\t\t||\t Train Name: %-25s            ||\n", train.name);
@@ -1729,16 +1764,18 @@ void checkAllReservations() {
     Reservation currentReservation;
 
     printf("\nYour Reservations:\n");
-    while (fscanf(reserFile, "%s %s %s %d %f %d", currentReservation.name, currentReservation.userId,
+
+    while (fscanf(reserFile, "%s %s %s %d %f %d %d %s %s %lld %s %s %d %lld", currentReservation.name, currentReservation.userId,
               currentReservation.trainId, &currentReservation.compartment, &currentReservation.cost,
-              &currentReservation.noOfSeats) != EOF) {
-            fscanf(reserFile, " %d", &currentReservation.seats);
-            fscanf(reserFile, " %s %s %lld %s", currentReservation.seatType, currentReservation.status, &currentReservation.pnr, currentReservation.date);
+              &currentReservation.noOfSeats, &currentReservation.seats , currentReservation.seatType, currentReservation.status, &currentReservation.pnr, currentReservation.date, currentReservation.gender, &currentReservation.age, &currentReservation.phone) != EOF) {
 
         if (strcmp(currentReservation.userId, userIdPtr) == 0) {
             currentReservationFound = 1;
             printf("\nReservation Details:\n");
             printf("Name: %s\n", currentReservation.name);
+            printf("Age: %d\n", currentReservation.age);
+            printf("Gender: %s\n", currentReservation.gender);
+            printf("Phone: %lld\n", currentReservation.phone);
             printf("Train ID: %s\n", currentReservation.trainId);
             printf("Compartment: %d\n", currentReservation.compartment);
             printf("Cost: %.2f\n", currentReservation.cost);
@@ -1770,40 +1807,136 @@ void checkAllReservations() {
 }
 
 void showUserInfo(){
+    int userInfoChoice;
     FILE *file = fopen("users.txt", "r");
     if (file == NULL) {
         printf("Error opening file.\n");
         exit(1);
     }
+    int foundUser=0;
 
     char line[500];
     while (fgets(line, sizeof(line), file) != NULL) {
         User user;
-        sscanf(line, "%s %s %s %s", user.userId, user.email, user.password, user.name);
+        sscanf(line, "%s %s %s %s %d %s %lld", user.userId, user.email, user.password, user.name, &user.age, user.gender, &user.phone);
 
         if (strcmp(user.userId, userId) == 0) {
+            foundUser = 1;
+            PrintSleep(0.18);
             clearTerminal();
             printf("\n\n\n\n\n==============================================================================================\n\n");
             printf("\t\t\t\t\t\033[1;31mYour Profile\033[0m\t\t");
             printf("\n\n==============================================================================================\n");
             printf("\tUser ID: %s\n", user.userId);
             printf("\tName: %s\n", user.name);
+            printf("\tAge: %d\n", user.age);
+            printf("\tGender: %s\n", user.gender);
+            printf("\tPhone: +91 %lld\n", user.phone);
             printf("\tEmail: %s\n", user.email);
             printf("\tPassword: %s\n", user.password);
+            printf("\n\n==============================================================================================\n");
             break;
+            }
         }
-    }
 
     fclose(file);
-    printf("\nPress 1 to change password or Press any key to go back to Main Menu\n");
-    int userInfoChoice;
+    if(foundUser == 1){
+    printf("\nPress 1 to change password or Press 2 to update profile details or Press any key to go back to Main Menu\n");
     scanf("%d", &userInfoChoice);
     if (userInfoChoice == 1) {
+        sleepProgram(2);
         resetPass();
+    }
+    else if(userInfoChoice == 2){
+        sleepProgram(2);
+        changeUserInfo();
     }
     else{
         mainMenu();
     }
+    }
+}
+
+void changeUserInfo(){
+    int WantToChange, resetDoneUser;
+    char email[100];
+    char newPassword[100];
+    char line[500];
+    getchar();
+    FILE *file = fopen("users.txt", "r");
+    
+    if (file == NULL) {
+        printf("Error opening file.\n");
+        exit(1);
+    }
+
+    FILE *tempFile = fopen("temp.txt", "w");
+    if (tempFile == NULL) {
+        printf("Error creating temporary file.\n");
+        fclose(file);
+        exit(1);
+    }
+
+    int userFound = 0;
+    while (fgets(line, sizeof(line), file) != NULL) {
+        User user;
+        sscanf(line, "%s %s %s %s %d %s %lld", user.userId, user.email, user.password, user.name, &user.age, user.gender, &user.phone);
+            if (strcmp(user.userId, userId) == 0) {
+            userFound = 1;
+            printf("\n\n\n\n\n==============================================================================================\n\n");
+            printf("\t\t\t\t\t\033[1;31mYour Current Details:\033[0m\t\t");
+            printf("\n\n==============================================================================================\n");
+            printf("\tUser ID: %s\n", user.userId);
+            printf("\tName: %s\n", user.name);
+            printf("\tAge: %d\n", user.age);
+            printf("\tGender: %s\n", user.gender);
+            printf("\tPhone: +91 %lld\n", user.phone);
+            printf("\tEmail: %s\n", user.email);
+            printf("\tPassword: %s\n", user.password);
+            printf("\n\n==============================================================================================\n");
+            printf("\n\nTo update ur details press 1 or press any other key to exit to main menu\n");
+            scanf("%d", &WantToChange);
+            if (WantToChange == 1) {
+                printf("\nEnter new details:\n");
+                printf("Please enter your new name: ");
+                scanf("%s", user.name);
+                getchar();
+
+                printf("Please enter your Age: ");
+                scanf("%d", &user.age);
+                getchar();
+
+                printf("Please enter your Gender: ");
+                scanf("%s", user.gender);
+                getchar();
+
+                printf("Please enter your Phone: ");
+                scanf("%lld", &user.phone);
+                getchar();
+
+                printf("Please enter your new password: ");
+                scanf("%s", user.password);
+                getchar();
+                sleepProgram(2);
+                printf("\n\nProfile  Update Successful!!");
+                printf("\nYou will be redirected to Main Menu in 3 seconds\n");
+                sleepProgram(3);
+                mainMenu();
+            }
+            else{
+                mainMenu();
+            }
+            }
+
+            fprintf(tempFile, "%s %s %s %s %d %s %lld\n", user.userId, user.email, user.password, user.name, user.age, user.gender, user.phone);
+        }
+    fclose(file);
+    fclose(tempFile);
+    remove("users.txt");
+    fclose(fopen("users.txt", "w"));  
+    copyFile("temp.txt", "users.txt");
+    remove("temp.txt");
+    fclose(file);
 }
 
 void mainMenu(){
