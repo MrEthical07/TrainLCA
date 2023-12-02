@@ -23,7 +23,9 @@ A C program to reserve train tickets with following functionality:
     6)Option to cancel tickets:
     	i)option to cancel ticket.
     	ii)with proper refund messages.
-    ***ADDITIONAL FEATURES***
+     
+# ***ADDITIONAL FEATURES***
+    
     1)QR code payment format
     2)User profile update
     3)Admin panel
@@ -33,14 +35,15 @@ A C program to reserve train tickets with following functionality:
     7)Proper PDF generation.
     8)Proper user interface allowing user to perform all actions without having to restart the program.
     9)Menu Based program.
-    *****CAUTIONS*****
+   
+# *****CAUTIONS*****
     1)Input should be of the type that is asked.
     2)All input should be in lowercase (unless stated otherwise and as per choice for name and other user details).
 
-Input Required:
+# Input Required:
     as per the program flow and user wishes.
 
-Algorithms used (module use):
+# Algorithms used (module use):
     1)External library:
         i)qrcodegen.h
         ii)pdfgen.h
