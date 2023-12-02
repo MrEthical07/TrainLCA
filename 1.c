@@ -958,7 +958,7 @@ void displayDelayedTrains(int isAdmin) {
     int delayedFoundTrain = 0;
     DelayedTrain delayedTrain;
     while (fscanf(file, "%s %s %s %s %d %d %s %d %d", delayedTrain.trainId, delayedTrain.startingPoint, delayedTrain.destination, delayedTrain.departureTime, &delayedTrain.cost, &delayedTrain.compartments, delayedTrain.seatType, &delayedTrain.isDelayed, &delayedTrain.delayTime) != EOF) {
-        if(strcmp(delayedTrain.isDelayed, delayedTrainID) == 0){
+        if(strcmp(delayedTrain.trainId, delayedTrainID) == 0){
             delayedFoundTrain = 1;
     printf("\n===========================================================================================================================================================\n");
     printf("| %-10s | %-20s | %-20s | %-15s | %-5s | %-20s | %-20s | %-10s | %-15s |\n", "Train ID", "Starting Point", "Destination", "Departure Time", "Cost", "Compartments", "Seat Type", "Status", "Delay (min)");
