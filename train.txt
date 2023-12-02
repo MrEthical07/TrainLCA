@@ -1,3 +1,0 @@
-2
-01 pune jaipur 12:00PM 880 8 both Rajdhani 120 600
-101 pune mumbai 01:00PM 100 7 both PuneMumbaiExpress 120 140
