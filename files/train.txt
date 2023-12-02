@@ -1,0 +1,18 @@
+17
+2149 Pune Danapur 20:05_hrs 2205 8 both Patna_Pune_Express 120 1700
+22177 Mumbai Varanasi 00:10_Hrs 2500 9 both Mahanagar_SF_Express 110 1515
+15017 Mumbai Varanasi 6:35_Hrs 1500 8 both Kashi_Express 120 1488
+12167 Mumbai Banaras 13:50_Hrs 1950 9 both Kamayani_Express 120 1501
+13413 Patna Delhi 04:55_Hrs 2100 9 both Farakka_Express 120 1036
+12487 Danapur Delhi 05:35_Hrs 1750 8 both Seemanchal_Express 120 962
+22538 Mumbai Lucknow 00:35 2300 8 Both Kushinagar_SF_Express 120 1372
+12519 Mumbai Jabalpur 07:50_Hrs 1950 8 Both Agarthala_SF_Express 120 980
+12779 Pune Goa 03:55_Hrs 825 8 Both Goa_Express 120 450
+12124 Pune Mumbai 07:15_Hrs 120 6 Both Deccan_Queen 110 192
+12940 Pune Jaipur 17:00_Hrs 730 8 Both Jaipur_Pune_Express 110 1292
+16587 Pune Bikaner 03:30_Hrs 675 8 Both Bikaner_Express 110 2450
+22159 Pune Chennai 16:25_Hrs 1500 8 both CSMT_Chennai_Exp 110 1280
+12163 Mumbai Chennai 18:50_Hrs 2000 7 Both LTT_MAS_EXP 115 1268
+1033 Pune Darbhanga 20:15_Hrs 780 8 Both DBG_Festival_SPL 120 816
+20607 Chennai Mysur 05:50_Hrs 780 8 Both MYS_Vandebharat 110 496
+22150 Pune Goa 18:45_Hrs 1430 8 Both Pune_ERS_SF_EXP 120 634

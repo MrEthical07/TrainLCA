@@ -1,0 +1,19 @@
+write a C program to reserve train tickets with following functionality:
+1)User System: Login and signup
+2)Tickets reservation:	
+	i)With option to select preferred class, compartment,seat type (seater or sleeper) and number of seats   Done
+	ii)With payment system.(with payment failure handling case).											 
+	iii)Once reserved, get PNR.
+3)Get Information of reservations (By entering PNR):
+	i)To know in which compartment, class seat is reserved.
+	ii)To know if ticket is confirmed or in waiting list.
+	iii)Get reservation id or referrence number of the reservation. 
+	iv)To know all about train (max speed, total dist to be travelled )
+4)Checking Train Status:
+	i)To know if a train is running late.
+	ii)To know time till arrival of a train.
+5)Alert System:
+	i)get different alerts in the case of train delays or change in schedules.
+6)Option to cancel tickets:
+	i)option to cancel ticket.
+	ii)Proper refund to the original payment method.
