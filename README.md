@@ -1,4 +1,4 @@
-# TrainLCA
+# Terminal Based Train Ticket Booking project 
 A C program to reserve train tickets with following functionality:
     1)User System: 
         i)Login
